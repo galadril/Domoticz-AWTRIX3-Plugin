@@ -9,9 +9,7 @@ Easily send **notifications**, manage **custom apps**, adjust **brightness**, co
 
 -   **Send Notifications**: Push messages and icons to the clock via the `/api/notify` endpoint.
 -   **Custom Apps**: Create or update app-specific messages using `/api/custom`.
--   **Adjust Brightness**: Dynamically control brightness through Domoticz.
 -   **Toggle Power**: Easily turn the clock on or off.
--   **Manage Effects**: Set animations like Rainbow, Fire, or Stars with a single click.
 
 
 ## Getting Started
@@ -55,12 +53,6 @@ The plugin adds text devices for notify (notifications) and app. Both work the s
 
     Input format: `<icon_id>,<message_text>`  
     Example: `1, Hello World!` sends a notification with icon ID 1 and message `Hello 
-       
--   **Brightness Control**:  
-    Adjust brightness levels via the **Selector Switch** device.
-    
--   **Effects**:  
-    Choose animations like Rainbow, Fire, or Stars using the **Effects Selector Switch**.
     
 -   **Power**:  
     Toggle the device on or off
