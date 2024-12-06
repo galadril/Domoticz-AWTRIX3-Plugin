@@ -40,13 +40,11 @@ class BasePlugin:
         # Initialization of variables
         self.awtrix_ip = None
         self.custom_app_name = "Domoticz"  # Fixed app name for the custom app
-        self.notify_unit = 1  # Device ID for the Notify device
-        self.custom_unit = 2  # Device ID for the Custom App device
-        self.power_unit = 3  # Device ID for the Power
-        self.lux_unit = 4  # Device ID for Lux
-        self.temp_unit = 6  # Device ID for Temperature/Humidity
-        self.push_button_unit_1 = 7  # Device ID for Push Button 1
-        self.push_button_unit_2 = 8  # Device ID for Push Button 2
+        self.power_unit = 1  # Device ID for the Power
+        self.lux_unit = 2  # Device ID for Lux
+        self.temp_unit = 3  # Device ID for Temperature/Humidity
+        self.push_button_notify = 4  # Device ID for Push Button 1
+        self.push_button_app = 5  # Device ID for Push Button 2
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -71,134 +69,147 @@ class BasePlugin:
         self.create_devices()
         
         Domoticz.Heartbeat(30)
-
+        
     def create_devices(self):
-        """ Creates devices if they don't already exist """
-        # Create devices only if they don't exist
-        if self.notify_unit not in Devices:
-            Domoticz.Device(Name="Notify Device", Unit=self.notify_unit, TypeName="Text").Create()
-            Domoticz.Log("Notify Device created.")
-        
-        if self.custom_unit not in Devices:
-            Domoticz.Device(Name="Custom App Device", Unit=self.custom_unit, TypeName="Text").Create()
-            Domoticz.Log("Custom App Device created.")
-            self.send_notify_device("Connected Domoticz")
-        
         if self.power_unit not in Devices:
             Domoticz.Device(Name="Power", Unit=self.power_unit, TypeName="Switch").Create()
             Domoticz.Log("Power Device created.")
-        
+            self.send_notify_device("Domoticz")
+
         if self.lux_unit not in Devices:
             Domoticz.Device(Name="Lux", Unit=self.lux_unit, TypeName="Illumination").Create()
             Domoticz.Log("Lux Device created.")
-        
+
         if self.temp_unit not in Devices:
             Domoticz.Device(Name="Temperature", Unit=self.temp_unit, TypeName="Temp+Hum").Create()
             Domoticz.Log("Temp+Hum Device created.")
-        
-        # Create Push Button devices
-        if self.push_button_unit_1 not in Devices:
-            Domoticz.Device(Name="Send Notification", Unit=self.push_button_unit_1, Type=244, Subtype=73, Switchtype=9).Create()
-        
-        if self.push_button_unit_2 not in Devices:
-            Domoticz.Device(Name="Send Custom App", Unit=self.push_button_unit_2, Type=244, Subtype=73, Switchtype=9).Create()
+
+        if self.push_button_notify not in Devices:
+            Domoticz.Device(
+                Name="Send Notification",
+                Unit=self.push_button_notify,
+                Type=244, Subtype=73, Switchtype=9,
+                Description="Enter notification text here"
+            ).Create()
+            Domoticz.Log("Notification Push Button created.")
+
+        if self.push_button_app not in Devices:
+            Domoticz.Device(
+                Name="Send Custom App",
+                Unit=self.push_button_app,
+                Type=244, Subtype=73, Switchtype=9,
+                Description="Enter custom app text here"
+            ).Create()
+            Domoticz.Log("Custom App Push Button created.")
         
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
 
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log(f"Command received: Unit={Unit}, Command={Command}, Level={Level}, Hue={Hue}")
-        
-        if Unit == self.notify_unit:  # Notify Device
-            self.send_notify_device(Command)
-        elif Unit == self.custom_unit:  # Custom App Device
-            self.send_custom_app_device(Command)
-        elif Unit == self.power_unit:  # Power Device
-            self.send_power_device(Command)
-        elif Unit == self.push_button_unit_1:  # Push Button 1
-            self.handle_push_button_1()
-        elif Unit == self.push_button_unit_2:  # Push Button 2
-            self.handle_push_button_2()
+
+        if Unit == self.push_button_notify:
+            description = Devices[Unit].Description.strip()
+            if not description:
+                Domoticz.Error("Description field is empty. Cannot send data.")
+                return
+
+            try:
+                # Case 1: JSON input for Notify
+                if description.startswith("{") and description.endswith("}"):
+                    self.send_notify_json(description)
+                    Domoticz.Log("Sent JSON data to Notify API.")
+                
+                # Case 2: Icon;Message input for Notify
+                elif ";" in description:
+                    icon, message = description.split(";", 1)
+                    self.send_notify_message(icon.strip(), message.strip())
+                    Domoticz.Log(f"Sent Notify with icon: {icon.strip()} | message: {message.strip()}")
+                
+                # Case 3: Message only for Notify (default icon)
+                else:
+                    default_icon = "bell"  # Replace with your default icon name
+                    self.send_notify_message(default_icon, description)
+                    Domoticz.Log(f"Sent Notify with default icon: {default_icon} | message: {description}")
+            except Exception as e:
+                Domoticz.Error(f"Error processing Notify description: {e}")
+
+        elif Unit == self.push_button_app:
+            description = Devices[Unit].Description.strip()
+            if not description:
+                Domoticz.Error("Description field is empty. Cannot send data.")
+                return
+
+            try:
+                # Case 1: JSON input for Custom App
+                if description.startswith("{") and description.endswith("}"):
+                    self.send_custom_app_json(description)
+                    Domoticz.Log("Sent JSON data to Custom App API.")
+                
+                # Case 2: Icon;Message input for Custom App
+                elif ";" in description:
+                    icon, message = description.split(";", 1)
+                    self.send_custom_app_message(icon.strip(), message.strip())
+                    Domoticz.Log(f"Sent Custom App data with icon: {icon.strip()} | message: {message.strip()}")
+                
+                # Case 3: Message only for Custom App (default icon)
+                else:
+                    default_icon = "info"  # Replace with your default icon name
+                    self.send_custom_app_message(default_icon, description)
+                    Domoticz.Log(f"Sent Custom App data with default icon: {default_icon} | message: {description}")
+            except Exception as e:
+                Domoticz.Error(f"Error processing Custom App description: {e}")
+
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
 
-    def handle_push_button_1(self):
-        """ Handle the action for Push Button 1 """
-        # Get the text value from the Notify device and send it
-        notify_device = Devices[self.notify_unit]
-        message = notify_device.sValue
-        self.send_notify_device(message)
-
-    def handle_push_button_2(self):
-        """ Handle the action for Push Button 2 """
-        # Get the text value from the Custom App device and send it
-        custom_device = Devices[self.custom_unit]
-        message = custom_device.sValue
-        self.send_custom_app_device(message)
-
-    def send_notify_device(self, Command):
-        """ Sends a notification to the Awtrix API. Command format: icon_id,message_text """
+    def send_notify_json(self, json_data):
+        url = f"http://{self.awtrix_ip}/api/notify"
+        headers = {"Content-Type": "application/json"}
         try:
-            if self.is_device_reachable():
-                # Use the default icon if no custom icon is provided
-                icon_id = Parameters["Mode1"]  # Get default icon ID from plugin parameters
-                parts = Command.split(",", 1)
-                
-                # If there's only one part (message), use the default icon
-                if len(parts) == 1:
-                    message = parts[0].strip()
-                else:
-                    message = parts[1].strip()
-
-                # Prepare API payload
-                url = f"http://{self.awtrix_ip}/api/notify"
-                payload = {"text": message, "icon": icon_id}  # Add icon_id to payload
-
-                # Send the request with Basic Authentication if username/password are provided
-                if self.username and self.password:
-                    response = requests.post(url, json=payload, auth=HTTPBasicAuth(self.username, self.password))
-                else:
-                    response = requests.post(url, json=payload)
-
-                response.raise_for_status()
-
-                Domoticz.Log(f"Notification sent: Text='{message}' with Icon ID={icon_id}")
+            response = requests.post(url, data=json_data, headers=headers, auth=(self.username, self.password))
+            response.raise_for_status()
+            Domoticz.Log(f"Notify JSON sent successfully: {response.text}")
         except requests.exceptions.RequestException as e:
-            Domoticz.Log("AWTRIX device is unreachable. Skipping notification.")
+            Domoticz.Error(f"Failed to send Notify JSON: {e}")
 
-    def send_custom_app_device(self, Command):
-        """ Updates the custom app on the Awtrix API. Command format: icon_id,message_text """
+    def send_notify_message(self, icon, message):
+        url = f"http://{self.awtrix_ip}/api/notify"
+        data = {
+            "icon": icon,
+            "text": message
+        }
+        headers = {"Content-Type": "application/json"}
         try:
-            if self.is_device_reachable():
-                # Use the default icon if no custom icon is provided
-                icon_id = Parameters["Mode1"]  # Get default icon ID from plugin parameters
-                parts = Command.split(",", 1)
-                
-                # If there's only one part (message), use the default icon
-                if len(parts) == 1:
-                    message = parts[0].strip()
-                else:
-                    message = parts[1].strip()
-
-                # Prepare API payload
-                url = f"http://{self.awtrix_ip}/api/custom"
-                payload = {
-                    "name": self.custom_app_name,
-                    "text": message,
-                    "icon": icon_id  # Add icon_id to payload
-                }
-
-                # Send the request with Basic Authentication if username/password are provided
-                if self.username and self.password:
-                    response = requests.post(url, json=payload, auth=HTTPBasicAuth(self.username, self.password))
-                else:
-                    response = requests.post(url, json=payload)
-
-                response.raise_for_status()
-
-                Domoticz.Log(f"Custom app updated: Name='{self.custom_app_name}', Text='{message}' with Icon ID={icon_id}")
+            response = requests.post(url, json=data, headers=headers, auth=(self.username, self.password))
+            response.raise_for_status()
+            Domoticz.Log(f"Notify message sent successfully: {response.text}")
         except requests.exceptions.RequestException as e:
-            Domoticz.Log("AWTRIX device is unreachable. Skipping custom app update.")
+            Domoticz.Error(f"Failed to send Notify message: {e}")
+
+    def send_custom_app_json(self, json_data):
+        url = f"http://{self.awtrix_ip}/api/custom"
+        headers = {"Content-Type": "application/json"}
+        try:
+            response = requests.post(url, data=json_data, headers=headers, auth=(self.username, self.password))
+            response.raise_for_status()
+            Domoticz.Log(f"Custom App JSON sent successfully: {response.text}")
+        except requests.exceptions.RequestException as e:
+            Domoticz.Error(f"Failed to send Custom App JSON: {e}")
+
+    def send_custom_app_message(self, icon, message):
+        url = f"http://{self.awtrix_ip}/api/custom"
+        data = {
+            "icon": icon,
+            "text": message
+        }
+        headers = {"Content-Type": "application/json"}
+        try:
+            response = requests.post(url, json=data, headers=headers, auth=(self.username, self.password))
+            response.raise_for_status()
+            Domoticz.Log(f"Custom App message sent successfully: {response.text}")
+        except requests.exceptions.RequestException as e:
+            Domoticz.Error(f"Failed to send Custom App message: {e}")
 
     def send_power_device(self, Command):
         """ Toggles the power on/off for the AWTRIX device """
