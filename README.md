@@ -64,6 +64,16 @@ The description of the push buttons (`Send Notification` and `Send Custom App`) 
 For more details on all JSON options:
 [Custom Apps and Notifications](https://blueforcer.github.io/awtrix3/#/api?id=custom-apps-and-notifications)
 
+### Icons
+To display icons on the AWTRIX3 device, you need to manually upload them. You can fetch icons from the [LaMetric Developer Site](https://developer.lametric.com/icons).
+
+- **Default Domoticz icon:** 39762
+
+You can find the icon pack under the `/icons` directory in the GitHub repository.
+
+For more details on AWTRIX3 and how to upload/setup icons:
+[AWTRIX Icons Setup](https://blueforcer.github.io/awtrix3/#/icons)
+
 ## 🌈 Samples
 ![Samples1](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/images/awtrix_door.gif?raw=true)
 ![Samples2](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/images/awtrix_fan.gif?raw=true)
