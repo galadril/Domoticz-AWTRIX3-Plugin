@@ -1,0 +1,156 @@
+return {
+    -- The script is active
+    active = true,
+
+    -- Trigger section: run the script every 1 minute
+    on = {
+        timer = {
+            'every 1 minutes'
+        }
+    },
+
+    -- Custom logging level for this script
+    logging = {
+        level = domoticz.LOG_INFO,
+        marker = "AWTRIX_APP"
+    },
+
+    -- Persistent variables to track rotation
+    data = {
+        currentIndex = { initial = 0 } -- Start with the first status
+    },
+
+    -- Event execution when the timer triggers the script
+    execute = function(domoticz)
+        -- Unified dictionary of devices with icon mappings
+        local devicesConfig = {
+            ["Temperatuur - Woonkamer"] = { icon = 2355, type = "temperature" },
+            ["Power"] = { icon = 95, type = "power" },
+            ["Watermeter - Total usage"] = { icon = 18191, type = "water" },
+            ["Itho - Ventilation"] = { icon = 20121, type = "selector" },
+            ["Quatt - Status"] = { icon = 7627, type = "text"},
+            ["Buiten temperatuur"] = { icon = 2355, type = "temperature" },
+            ["Solar - Grid Power"] = { icon = 27283, type = "delivery" }
+        }
+
+        -- Check if the "AWTRIX3 - Power" device is on
+        local powerDevice = domoticz.devices("AWTRIX3 - Power")
+        if not powerDevice or powerDevice.state ~= "On" then
+            domoticz.log("AWTRIX3 - Power device is off. Skipping status updates.", domoticz.LOG_INFO)
+            return
+        else
+            domoticz.log("AWTRIX3 - Power device is on. Proceeding with status updates.", domoticz.LOG_INFO)
+        end
+
+        local statuses = {}
+        
+      -- Function to generate JSON description ({"text": "status", "icon": icon})
+        local function getDescription(device, config)
+            local status = ""
+            local icon = config.icon
+        
+            -- Check for different device types and retrieve the appropriate value
+            if config.type == "temperature" and device.temperature then
+                status = string.format("%.1fC", device.temperature) -- Format temperature
+            elseif config.type == "power" and device.usage then
+                status = string.format("%dW", device.usage) -- Format power usage
+            elseif config.type == "water" and device.counterToday then
+                status = string.format("%.1fL", device.counterToday) -- Format water counterToday
+            elseif config.type == "humidity" and device.humidity then
+                status = string.format("%d%%", device.humidity) -- Format humidity
+            elseif config.type == "electricity" and device.actualWatt then
+                status = string.format("%dW", device.actualWatt) -- Format electricity usage
+            elseif config.type == "gas" and device.counter then
+                status = string.format("%.1f m³", device.counter) -- Format gas usage
+            elseif config.type == "rain" and device.rain then
+                status = string.format("%.1f mm", device.rain) -- Format rain measurement
+            elseif config.type == "lux" and device.lux then
+                status = string.format("%d lux", device.lux) -- Format lux measurement
+            elseif config.type == "text" and device.text then
+                status = device.text
+            elseif config.type == "switch" then
+                status = device.state -- Format switch state on/off
+            elseif config.type == "selector" then
+                status = device.levelName -- Format selector state
+            elseif config.type == "percentage" and device.percentage then
+                status = string.format("%d %", device.percentage) -- Format percentage
+            elseif config.type == "pressure" and device.pressure then
+                status = string.format("%d", device.pressure) -- Format pressure
+            elseif config.type == "uv" and device.uv then
+                status = string.format("%d", device.uv) -- Format uv
+            elseif config.type == "waterflow" and device.flow then
+                status = string.format("%d l/min", device.flow) -- Format flow
+            elseif config.type == "visibility" and device.visibility then
+                status = string.format("%d km", device.visibility) -- Format visibility
+            elseif config.type == "delivery" and device.usageDelivered then
+                status = string.format("%d Watt", device.usageDelivered) -- Format usageDelivered
+            end
+        
+            -- Return the formatted JSON description if status is not empty
+            if status ~= "" then
+                return string.format('{ "text": "%s", "icon": %d }', status, icon)
+            end
+        
+            return nil
+        end
+
+        -- Collect statuses for each relevant device
+        for deviceName, config in pairs(devicesConfig) do
+            local device = domoticz.devices(deviceName)
+            if device then
+                local description = getDescription(device, config)
+                if description then
+                    table.insert(statuses, {name = deviceName, description = description})
+                    domoticz.log(string.format("Collected status for %s: %s", deviceName, description), domoticz.LOG_INFO)
+                else
+                    domoticz.log(string.format("No status collected for %s", deviceName), domoticz.LOG_INFO)
+                end
+            else
+                domoticz.log("Device not found in Domoticz: " .. deviceName, domoticz.LOG_ERROR)
+            end
+        end
+
+        -- Ensure we have statuses collected
+        if #statuses == 0 then
+            domoticz.log("No statuses available to send to AWTRIX.", domoticz.LOG_ERROR)
+            return
+        end
+
+        -- Get the current index (starting at 1, not 0)
+        local currentIndex = domoticz.data.currentIndex
+        if not currentIndex or currentIndex < 0 then
+            currentIndex = 0 -- Ensure it's at least 0 if not properly set
+        end
+
+        -- Cycle through statuses
+        if currentIndex > #statuses then
+            currentIndex = 0 -- Reset to the first status if the index exceeds the number of statuses
+            domoticz.log("Resetting index to 0", domoticz.LOG_INFO)
+        end
+
+        -- Select the current status to push
+        local selectedStatus = statuses[currentIndex]
+        domoticz.log(string.format("Selected status: %s", selectedStatus.description), domoticz.LOG_INFO)
+
+        -- Push the status to AWTRIX
+        local appDevice = domoticz.devices('AWTRIX3 - Send Custom App')
+        if appDevice then
+            -- Set the description (status and icon)
+            appDevice.setDescription(selectedStatus.description)
+            
+            -- Turn the device on to activate the status
+            appDevice.switchOn()
+
+            domoticz.log(string.format("Pushed status to AWTRIX: %s -> %s", selectedStatus.name, selectedStatus.description), domoticz.LOG_INFO)
+        else
+            domoticz.log("AWTRIX3 - Send Custom App device not found", domoticz.LOG_ERROR)
+        end
+
+        -- Update the index for the next cycle (ensure the increment is within bounds)
+        if currentIndex + 1 > #statuses then
+            domoticz.data.currentIndex = 1 -- Reset to 1 if the increment exceeds the count
+        else
+            domoticz.data.currentIndex = currentIndex + 1 -- Increment the index
+        end
+    end
+}
