@@ -53,6 +53,10 @@ The description of the push buttons (`Send Notification` and `Send Custom App`) 
 3. **Message:**
    - Example: `Hello, AWTRIX!`
 
+Check this sample dzVents script to in sequence push device states with icons to the device
+[Samples](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/samples/dzvents-sample.txt)
+
+
 ### Example JSONs
 **Simple Notification JSON:**
 ```json
