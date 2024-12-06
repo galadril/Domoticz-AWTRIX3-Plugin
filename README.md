@@ -1,74 +1,92 @@
+# Domoticz AWTRIX3 Plugin
 
+**Plugin for Integrating AWTRIX3 Smart Pixel Clock with Domoticz**
 
-The **Awtrix3 Domoticz Plugin** allows you to interact with your **Awtrix3 Smart Pixel Clock** directly from Domoticz.  
+## Overview
 
-Easily send **notifications**, manage **custom apps**, adjust **brightness**, control **effects**, and toggle the clock's power—all without leaving your Domoticz dashboard.
-
+This plugin allows you to integrate the AWTRIX3 Smart Pixel Clock with Domoticz, enabling you to send messages as notifications or manage custom apps dynamically. You can also control power, fetch, and display temperature, humidity, and illumination stats, and use push buttons for notifications or custom app text.
 
 ## Features
 
--   **Send Notifications**: Push messages and icons to the clock via the `/api/notify` endpoint.
--   **Custom Apps**: Create or update app-specific messages using `/api/custom`.
--   **Toggle Power**: Easily turn the clock on or off.
+- **Send Messages as Notifications:** Use the Domoticz interface to send notification messages to your AWTRIX3 device.
+- **Manage Custom Apps:** Dynamically send custom applications to your AWTRIX3 device.
+- **Power Control:** Toggle the power state of the AWTRIX3 display.
+- **Temperature, Humidity, and Illumination:** Fetch and display temperature, humidity, and illumination stats.
+- **Push Button Notifications:** Use virtual devices to trigger notifications or custom applications based on button input.
+- **Debugging Options:** Multiple levels of debugging to help you get precise information about the plugin activities.
 
+## Installation
 
-## Getting Started
+1. **Download the Plugin:**
+   - Clone the plugin repository: `git clone https://github.com/galadril/Domoticz-AWTRIX3-Plugin`
+   - Navigate to the plugin directory: `cd Domoticz-AWTRIX3-Plugin`
 
-To get the plugin running, follow these simple steps:
+2. **Install Dependencies:**
+   - Ensure you have `requests` module installed: `pip install requests`
 
-### Prerequisites
+3. **Add to Domoticz:**
+   - Open the Domoticz interface and go to `Setup -> Hardware`.
+   - Select `AWTRIX3` from the list of hardware types.
+   - Fill in the required fields such as IP Address, Username and Password (if applicable), and Debug level.
 
--   Domoticz installed on your system.
--   Awtrix3 Smart Pixel Clock connected to your network.
+## Configuration
 
-### Installation
+### Parameters
 
-1.  Clone the repository:
-    
-    ```sh
-    git clone https://github.com/galadril/Domoticz-AWTRIX3-Plugin.git
-    
-    ```
-    
-2.  Copy the plugin to your Domoticz plugin folder:
-    
-    ```sh
-    cp -r Domoticz-AWTRIX3-Plugin /path/to/domoticz/plugins/
-    
-    ```
-    
-3.  Restart Domoticz to load the plugin:
-    
-    ```sh
-    sudo service domoticz.sh restart
-    
-    ```
-    
-4.  Add the plugin in Domoticz through **Hardware Settings** and configure the IP address and other parameters.
+- **IP Address:** The IP address of your AWTRIX3 device.
+- **Username:** The username for basic authentication (optional).
+- **Password:** The password for basic authentication (optional).
+- **Default Icon ID:** Default icon ID to be used in notifications.
+- **Debug Level:** Choose the level of debug information you want to receive.
 
+### Devices
 
-## Usage
-
-The plugin adds text devices for notify (notifications) and app. Both work the same way, but sending data as app message, or as notification.
-
-    Input format: `<icon_id>,<message_text>`  
-    Example: `1, Hello World!` sends a notification with icon ID 1 and message `Hello 
-    
--   **Power**:  
-    Toggle the device on or off
-
-
-## Updating
-
-To update:
-* Go in your Domoticz directory using a command line and open the plugins directory then the Domoticz-AWTRIX3-Plugin directory.
-* Run: ```git pull```
-* Restart Domoticz.
-
+- **Power Device:** Toggles the power state of the AWTRIX3 device.
+- **Lux Device:** Displays the illumination levels.
+- **Temp+Hum Device:** Displays temperature and humidity levels with comfort index.
+- **Send Notification:** Virtual device to send notifications via the AWTRIX3 API.
+- **Send Custom App:** Virtual device to send custom applications data via the AWTRIX3 API.
 
 ## Usage
 
-The plugin will automatically discover compatible Quatt devices on your local network and create/update devices in Domoticz. 
+### Push Button Notifications
+
+The description of the push buttons (`Send Notification` and `Send Custom App`) can be used in three ways:
+
+1. **JSON:**
+   - Example: `{ "text": "600 L", "icon": 9766 }`
+
+2. **Icon;Message:**
+   - Format: `icon;message`
+   - Example: `9766;Check the temperature!`
+
+3. **Message:**
+   - Example: `Hello, AWTRIX!`
+
+### Example JSONs
+
+**Simple Notification JSON:**
+```json
+{
+  "text": "21 C",
+  "icon": 9766
+}
+```
+
+More details no all json options:
+[Custom Apps and Notifications](https://blueforcer.github.io/awtrix3/#/api?id=custom-apps-and-notifications)
+
+## Updates and Contributions
+
+- This project is open-source and contributions are welcome! Visit the GitHub repository for more information: [Domoticz-AWTRIX3-Plugin](https://blueforcer.github.io/awtrix3/#/api?id=custom-apps-and-notifications).
+
+## More on AWTRIX3
+
+For more information on AWTRIX3, refer to the official documentation here: [AWTRIX3 GitHub](https://github.com/Blueforcer/awtrix3).
+
+---
+
+Feel free to customize this README further to suit your specific needs!
 
 
 ## Debugging
