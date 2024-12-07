@@ -160,6 +160,8 @@ class BasePlugin:
             except Exception as e:
                 Domoticz.Error(f"Error processing Custom App description: {e}")
 
+        elif Unit == self.power_unit:  # Power Device
+            self.send_power_device(Command)
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
 
