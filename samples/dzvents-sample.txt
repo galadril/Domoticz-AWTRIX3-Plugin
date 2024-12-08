@@ -29,7 +29,7 @@ return {
             ["Watermeter - Total usage"] = { icon = 18191, type = "water" },
             ["Itho - Ventilation"] = { icon = 20121, type = "selector" },
             ["Quatt - Status"] = { icon = 7627, type = "text"},
-            ["Buiten temperatuur"] = { icon = 2355, type = "temperature" },
+            ["Buiten temperatuur"] = { icon = 64162, type = "temperature" },
             ["Solar - Grid Power"] = { icon = 27283, type = "delivery" }
         }
 
@@ -133,7 +133,7 @@ return {
         domoticz.log(string.format("Selected status: %s", selectedStatus.description), domoticz.LOG_INFO)
 
         -- Push the status to AWTRIX
-        local appDevice = domoticz.devices('AWTRIX3 - Send Custom App')
+        local appDevice = domoticz.devices('AWTRIX3 - Send Data')
         if appDevice then
             -- Set the description (status and icon)
             appDevice.setDescription(selectedStatus.description)
@@ -143,7 +143,7 @@ return {
 
             domoticz.log(string.format("Pushed status to AWTRIX: %s -> %s", selectedStatus.name, selectedStatus.description), domoticz.LOG_INFO)
         else
-            domoticz.log("AWTRIX3 - Send Custom App device not found", domoticz.LOG_ERROR)
+            domoticz.log("AWTRIX3 - Send Data device not found", domoticz.LOG_ERROR)
         end
 
         -- Update the index for the next cycle (ensure the increment is within bounds)
