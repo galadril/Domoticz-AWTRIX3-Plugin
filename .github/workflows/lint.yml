@@ -3,7 +3,8 @@ name: Lint Python Code
 on:
   pull_request:
     branches:
-      - main
+      - main  # Specify the branch name, e.g., 'main' or 'master'
+  workflow_dispatch:
 
 jobs:
   lint:
