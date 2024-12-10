@@ -56,6 +56,8 @@ The description of the push buttons (`Send Notification` and `Send Custom App`) 
 Check this sample dzVents script to in sequence push device states with icons to the device
 [Samples](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/samples/dzvents-sample.txt)
 
+If you like to use dzVents to set the description of the notification and custom app switches, you need to allow 127.0.0.* as trusted network under Settings/Security
+
 
 ### Example JSONs
 **Simple Notification JSON:**
