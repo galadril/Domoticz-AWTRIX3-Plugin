@@ -30,7 +30,8 @@ return {
             ["Itho - Ventilation"] = { icon = 20121, type = "selector" },
             ["Quatt - Status"] = { icon = 7627, type = "text"},
             ["Buiten temperatuur"] = { icon = 64162, type = "temperature" },
-            ["Solar - Grid Power"] = { icon = 27283, type = "delivery" }
+            ["Solar - Grid Power"] = { icon = 27283, type = "delivery" },
+            ["Gas"] = { icon = 54633, type = "gas" }
         }
 
         -- Check if the "AWTRIX3 - Power" device is on
@@ -81,9 +82,11 @@ return {
             elseif config.type == "waterflow" and device.flow then
                 status = string.format("%d l/min", device.flow) -- Format flow
             elseif config.type == "visibility" and device.visibility then
-                status = string.format("%d km", device.visibility) -- Format visibility
+                status = string.format("%d Km", device.visibility) -- Format visibility
             elseif config.type == "delivery" and device.usageDelivered then
-                status = string.format("%d Watt", device.usageDelivered) -- Format usageDelivered
+                status = string.format("%dW", device.usageDelivered) -- Format usageDelivered
+            elseif config.type == "gas" and device.counterToday then
+                status = string.format("%d m3", device.counterToday) -- Format gas usage
             end
         
             -- Return the formatted JSON description if status is not empty
