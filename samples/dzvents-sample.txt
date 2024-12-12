@@ -24,13 +24,13 @@ return {
     execute = function(domoticz)
         -- Unified dictionary of devices with icon mappings
         local devicesConfig = {
+            ["Kerstboom"] = { icon = 4889, type = "switch" },
             ["Temperatuur - Woonkamer"] = { icon = 2355, type = "temperature" },
             ["Power"] = { icon = 95, type = "power" },
             ["Watermeter - Total usage"] = { icon = 18191, type = "water" },
             ["Itho - Ventilation"] = { icon = 20121, type = "selector" },
             ["Quatt - Status"] = { icon = 7627, type = "text"},
             ["Buiten temperatuur"] = { icon = 64162, type = "temperature" },
-            ["Solar - Grid Power"] = { icon = 27283, type = "delivery" },
             ["Gas"] = { icon = 54633, type = "gas" }
         }
 
@@ -61,8 +61,6 @@ return {
                 status = string.format("%d%%", device.humidity) -- Format humidity
             elseif config.type == "electricity" and device.actualWatt then
                 status = string.format("%dW", device.actualWatt) -- Format electricity usage
-            elseif config.type == "gas" and device.counter then
-                status = string.format("%.1f m³", device.counter) -- Format gas usage
             elseif config.type == "rain" and device.rain then
                 status = string.format("%.1f mm", device.rain) -- Format rain measurement
             elseif config.type == "lux" and device.lux then
@@ -82,11 +80,11 @@ return {
             elseif config.type == "waterflow" and device.flow then
                 status = string.format("%d l/min", device.flow) -- Format flow
             elseif config.type == "visibility" and device.visibility then
-                status = string.format("%d Km", device.visibility) -- Format visibility
+                status = string.format("%d km", device.visibility) -- Format visibility
             elseif config.type == "delivery" and device.usageDelivered then
                 status = string.format("%dW", device.usageDelivered) -- Format usageDelivered
             elseif config.type == "gas" and device.counterToday then
-                status = string.format("%d m3", device.counterToday) -- Format gas usage
+                status = string.format("%.2f m3", device.counterToday)
             end
         
             -- Return the formatted JSON description if status is not empty
@@ -104,7 +102,7 @@ return {
                 local description = getDescription(device, config)
                 if description then
                     table.insert(statuses, {name = deviceName, description = description})
-                    domoticz.log(string.format("Collected status for %s: %s", deviceName, description), domoticz.LOG_INFO)
+                    domoticz.log(string.format("Collected status for %s: %s", deviceName, description), domoticz.LOG_DEBUG)
                 else
                     domoticz.log(string.format("No status collected for %s", deviceName), domoticz.LOG_INFO)
                 end
@@ -134,17 +132,13 @@ return {
         -- Select the current status to push
         local selectedStatus = statuses[currentIndex]
         domoticz.log(string.format("Selected status: %s", selectedStatus.description), domoticz.LOG_INFO)
-
+        
         -- Push the status to AWTRIX
         local appDevice = domoticz.devices('AWTRIX3 - Send Data')
         if appDevice then
             -- Set the description (status and icon)
             appDevice.setDescription(selectedStatus.description)
-            
-            -- Turn the device on to activate the status
-            appDevice.switchOn()
-
-            domoticz.log(string.format("Pushed status to AWTRIX: %s -> %s", selectedStatus.name, selectedStatus.description), domoticz.LOG_INFO)
+            domoticz.devices('AWTRIX3 - Send Data').switchOn().afterSec(2)
         else
             domoticz.log("AWTRIX3 - Send Data device not found", domoticz.LOG_ERROR)
         end
