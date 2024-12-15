@@ -91,6 +91,7 @@ For more details on AWTRIX3 and how to upload/setup icons:
 | ------- | ----------- |
 |   0.0.1 | Initial version |
 |   0.0.2 | Fixed issue with Power Device |
+|   0.0.3 | Fixes on first use of hardware |
 
 ## 🚀 Updates and Contributions
 This project is open-source and contributions are welcome! Visit the GitHub repository for more information: [Domoticz-AWTRIX3-Plugin](https://blueforcer.github.io/awtrix3/#/api?id=custom-apps-and-notifications).
