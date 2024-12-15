@@ -50,6 +50,7 @@ class BasePlugin:
         # Read username and password for basic auth
         self.username = ""
         self.password = ""
+        self.default_icon = ""
 
     def onStart(self):
         Domoticz.Log("AWTRIX Plugin started.")
@@ -59,6 +60,7 @@ class BasePlugin:
         self.debug_level = int(Parameters["Mode6"])
         self.username = Parameters["Username"]
         self.password = Parameters["Password"]
+        self.default_icon = Parameters["Mode1"]
 
         if self.debug_level > 0:
             Domoticz.Debugging(self.debug_level)
@@ -74,7 +76,7 @@ class BasePlugin:
         if self.power_unit not in Devices:
             Domoticz.Device(Name="Power", Unit=self.power_unit, TypeName="Switch").Create()
             Domoticz.Log("Power Device created.")
-            self.send_notify_device("Domoticz")
+            self.send_notify_message(self.default_icon, "Domoticz")
 
         if self.lux_unit not in Devices:
             Domoticz.Device(Name="Lux", Unit=self.lux_unit, TypeName="Illumination").Create()
@@ -128,9 +130,8 @@ class BasePlugin:
                 
                 # Case 3: Message only for Notify (default icon)
                 else:
-                    default_icon = "bell"  # Replace with your default icon name
-                    self.send_notify_message(default_icon, description)
-                    Domoticz.Log(f"Sent Notify with default icon: {default_icon} | message: {description}")
+                    self.send_notify_message(self.default_icon, description)
+                    Domoticz.Log(f"Sent Notify with default icon: {self.default_icon} | message: {description}")
             except Exception as e:
                 Domoticz.Error(f"Error processing Notify description: {e}")
 
@@ -154,9 +155,8 @@ class BasePlugin:
                 
                 # Case 3: Message only for Custom App (default icon)
                 else:
-                    default_icon = "info"  # Replace with your default icon name
-                    self.send_custom_app_message(default_icon, description)
-                    Domoticz.Log(f"Sent Custom App data with default icon: {default_icon} | message: {description}")
+                    self.send_custom_app_message(self.default_icon, description)
+                    Domoticz.Log(f"Sent Custom App data with default icon: {self.default_icon} | message: {description}")
             except Exception as e:
                 Domoticz.Error(f"Error processing Custom App description: {e}")
 
