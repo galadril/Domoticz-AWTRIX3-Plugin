@@ -134,11 +134,11 @@ return {
         domoticz.log(string.format("Selected status: %s", selectedStatus.description), domoticz.LOG_INFO)
         
         -- Push the status to AWTRIX
-        local appDevice = domoticz.devices('AWTRIX3 - Send Data')
+        local appDevice = domoticz.devices('AWTRIX3 - Send Custom App')
         if appDevice then
             -- Set the description (status and icon)
             appDevice.setDescription(selectedStatus.description)
-            domoticz.devices('AWTRIX3 - Send Data').switchOn().afterSec(2)
+            appDevice.switchOn().afterSec(2)
         else
             domoticz.log("AWTRIX3 - Send Data device not found", domoticz.LOG_ERROR)
         end
