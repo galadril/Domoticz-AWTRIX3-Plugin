@@ -1,5 +1,5 @@
 """
-<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.1" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
+<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.3" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
     <description>
         Plugin for integrating AWTRIX3 Smart Pixel Clock with Domoticz. 
         Send messages as notifications or manage custom apps dynamically.
@@ -121,14 +121,19 @@ class BasePlugin:
                 if description.startswith("{") and description.endswith("}"):
                     self.send_notify_json(description)
                     Domoticz.Log("Sent JSON data to Notify API.")
+                    
+                # Case 2: JSON input for Notify
+                elif description.startswith("[") and description.endswith("]"):
+                    self.send_notify_json(description)
+                    Domoticz.Log("Sent JSON data to Notify API.")
                 
-                # Case 2: Icon;Message input for Notify
+                # Case 3: Icon;Message input for Notify
                 elif ";" in description:
                     icon, message = description.split(";", 1)
                     self.send_notify_message(icon.strip(), message.strip())
                     Domoticz.Log(f"Sent Notify with icon: {icon.strip()} | message: {message.strip()}")
                 
-                # Case 3: Message only for Notify (default icon)
+                # Case 4: Message only for Notify (default icon)
                 else:
                     self.send_notify_message(self.default_icon, description)
                     Domoticz.Log(f"Sent Notify with default icon: {self.default_icon} | message: {description}")
@@ -146,14 +151,19 @@ class BasePlugin:
                 if description.startswith("{") and description.endswith("}"):
                     self.send_custom_app_json(description)
                     Domoticz.Log("Sent JSON data to Custom App API.")
+                    
+                # Case 2: JSON input for Custom App
+                elif description.startswith("[") and description.endswith("]"):
+                    self.send_custom_app_json(description)
+                    Domoticz.Log("Sent JSON data to Custom App API.")
                 
-                # Case 2: Icon;Message input for Custom App
+                # Case 3: Icon;Message input for Custom App
                 elif ";" in description:
                     icon, message = description.split(";", 1)
                     self.send_custom_app_message(icon.strip(), message.strip())
                     Domoticz.Log(f"Sent Custom App data with icon: {icon.strip()} | message: {message.strip()}")
                 
-                # Case 3: Message only for Custom App (default icon)
+                # Case 4: Message only for Custom App (default icon)
                 else:
                     self.send_custom_app_message(self.default_icon, description)
                     Domoticz.Log(f"Sent Custom App data with default icon: {self.default_icon} | message: {description}")
