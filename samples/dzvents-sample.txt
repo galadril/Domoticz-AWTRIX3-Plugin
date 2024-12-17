@@ -24,6 +24,18 @@ return {
     execute = function(domoticz)
         local multiApp = true -- Set to false for singleApp mode
         
+        -- Ordered list of device names to enforce consistent iteration
+        local orderedDevices = {
+            "Kerstboom",
+            "Temperatuur - Woonkamer",
+            "Power",
+            "Watermeter - Total usage",
+            "Itho - Ventilation",
+            "Quatt - Status",
+            "Buiten temperatuur",
+            "Gas"
+        }
+        
         -- Unified dictionary of devices with icon mappings
         local devicesConfig = {
             ["Kerstboom"] = { icon = 4889, type = "switch" },
@@ -35,7 +47,7 @@ return {
             ["Buiten temperatuur"] = { icon = 64162, type = "temperature" },
             ["Gas"] = { icon = 54633, type = "gas" }
         }
-
+        
         -- Check if the "AWTRIX3 - Power" device is on
         local powerDevice = domoticz.devices("AWTRIX3 - Power")
         if not powerDevice or powerDevice.state ~= "On" then
@@ -77,8 +89,9 @@ return {
             return nil
         end
 
-        -- Collect statuses for each relevant device
-        for deviceName, config in pairs(devicesConfig) do
+        -- Collect statuses for each relevant device in a fixed order
+        for _, deviceName in ipairs(orderedDevices) do
+            local config = devicesConfig[deviceName]
             local device = domoticz.devices(deviceName)
             if device then
                 local description = getDescription(device, config)
