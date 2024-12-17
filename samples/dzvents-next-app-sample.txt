@@ -15,11 +15,6 @@ return {
         marker = "AWTRIX_NEXT"
     },
 
-    -- Persistent variables to track rotation for singleApp mode
-    data = {
-        currentIndex = { initial = 0 } -- Start with the first status
-    },
-
     -- Event execution when the timer triggers the script
     execute = function(domoticz)
         local powerDevice = domoticz.devices("AWTRIX3 - Power")
@@ -27,7 +22,7 @@ return {
             return
         end
 
-        local appNextDevice = domoticz.devices('AWTRIX3 - Send Custom App')
+        local appNextDevice = domoticz.devices('AWTRIX3 - Next App')
         appNextDevice.switchOn()
     end
 }
