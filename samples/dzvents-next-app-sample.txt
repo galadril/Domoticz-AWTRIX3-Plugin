@@ -1,0 +1,33 @@
+return {
+    -- The script is active
+    active = true,
+
+    -- Trigger section: run the script every 1 minute
+    on = {
+        timer = {
+            'every 1 minutes'
+        }
+    },
+
+    -- Custom logging level for this script
+    logging = {
+        level = domoticz.LOG_INFO,
+        marker = "AWTRIX_NEXT"
+    },
+
+    -- Persistent variables to track rotation for singleApp mode
+    data = {
+        currentIndex = { initial = 0 } -- Start with the first status
+    },
+
+    -- Event execution when the timer triggers the script
+    execute = function(domoticz)
+        local powerDevice = domoticz.devices("AWTRIX3 - Power")
+        if not powerDevice or powerDevice.state ~= "On" then
+            return
+        end
+
+        local appNextDevice = domoticz.devices('AWTRIX3 - Send Custom App')
+        appNextDevice.switchOn()
+    end
+}
