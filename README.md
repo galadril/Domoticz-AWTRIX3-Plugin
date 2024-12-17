@@ -41,6 +41,8 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Temp+Hum Device:** Displays temperature and humidity levels with comfort index.
 - **Send Notification:** Virtual device to send notifications via the AWTRIX3 API.
 - **Send Custom App:** Virtual device to send custom applications data via the AWTRIX3 API.
+- **Next App:** Navigate to the next app via the AWTRIX3 API.
+- **Previous App:** Navigate to the previous app via the AWTRIX3 API.
 
 ## 🚀 Usage
 ### Push Button Notifications
