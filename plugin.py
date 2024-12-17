@@ -45,6 +45,8 @@ class BasePlugin:
         self.temp_unit = 3  # Device ID for Temperature/Humidity
         self.push_button_notify = 4  # Device ID for Push Button 1
         self.push_button_app = 5  # Device ID for Push Button 2
+        self.push_button_previous = 6  # Device ID for Send Left
+        self.push_button_next = 7  # Device ID for Send Right
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -103,14 +105,46 @@ class BasePlugin:
                 Description="Enter custom app text here"
             ).Create()
             Domoticz.Log("Custom App Push Button created.")
+            
+        if self.push_button_previous not in Devices:
+            Domoticz.Device(
+                Name="Previous App",
+                Unit=self.push_button_previous,
+                Type=244, Subtype=73, Switchtype=9,
+                Description="Trigger the 'previousapp' API command"
+            ).Create()
+            Domoticz.Log("Send Previous Push Button created.")
+
+        if self.push_button_next not in Devices:
+            Domoticz.Device(
+                Name="Next App",
+                Unit=self.push_button_next,
+                Type=244, Subtype=73, Switchtype=9,
+                Description="Trigger the 'nextapp' API command"
+            ).Create()
+            Domoticz.Log("Send Next Push Button created.")
         
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
 
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log(f"Command received: Unit={Unit}, Command={Command}, Level={Level}, Hue={Hue}")
+        
+        if Unit == self.push_button_previous:
+            try:
+                self.send_api_command("previousapp")
+                Domoticz.Log("Triggered 'previousapp' command successfully.")
+            except Exception as e:
+                Domoticz.Error(f"Error triggering 'previousapp': {e}")
 
-        if Unit == self.push_button_notify:
+        elif Unit == self.push_button_next:
+            try:
+                self.send_api_command("nextapp")
+                Domoticz.Log("Triggered 'nextapp' command successfully.")
+            except Exception as e:
+                Domoticz.Error(f"Error triggering 'nextapp': {e}")
+
+        elif Unit == self.push_button_notify:
             description = Devices[Unit].Description.strip()
             if not description:
                 Domoticz.Error("Description field is empty. Cannot send data.")
@@ -174,6 +208,15 @@ class BasePlugin:
             self.send_power_device(Command)
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
+
+    def send_api_command(self, command):
+        url = f"http://{self.awtrix_ip}/api/{command}"
+        try:
+            response = requests.post(url, auth=HTTPBasicAuth(self.username, self.password) if self.username and self.password else None)
+            response.raise_for_status()
+            Domoticz.Log(f"API command '{command}' executed successfully.")
+        except requests.exceptions.RequestException as e:
+            Domoticz.Error(f"Failed to send '{command}' command: {e}")
 
     def send_notify_json(self, json_data):
         url = f"http://{self.awtrix_ip}/api/notify"
