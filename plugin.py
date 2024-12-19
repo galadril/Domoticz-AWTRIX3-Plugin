@@ -245,8 +245,9 @@ class BasePlugin:
     def send_custom_app_json(self, json_data):
         url = f"http://{self.awtrix_ip}/api/custom"
         headers = {"Content-Type": "application/json"}
+        p = {"name": self.custom_app_name}
         try:
-            response = requests.post(url, data=json_data, headers=headers, auth=(self.username, self.password))
+            response = requests.post(url, data=json_data, params=p, headers=headers, auth=(self.username, self.password))
             response.raise_for_status()
             Domoticz.Log(f"Custom App JSON sent successfully: {response.text}")
         except requests.exceptions.RequestException as e:
@@ -254,13 +255,14 @@ class BasePlugin:
 
     def send_custom_app_message(self, icon, message):
         url = f"http://{self.awtrix_ip}/api/custom"
+        p = {"name": self.custom_app_name}
         data = {
             "icon": icon,
             "text": message
         }
         headers = {"Content-Type": "application/json"}
         try:
-            response = requests.post(url, json=data, headers=headers, auth=(self.username, self.password))
+            response = requests.post(url, json=data, params=p, headers=headers, auth=(self.username, self.password))
             response.raise_for_status()
             Domoticz.Log(f"Custom App message sent successfully: {response.text}")
         except requests.exceptions.RequestException as e:
