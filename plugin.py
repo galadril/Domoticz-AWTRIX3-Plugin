@@ -1,5 +1,5 @@
 """
-<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.4" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
+<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.5" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
     <description>
         Plugin for integrating AWTRIX3 Smart Pixel Clock with Domoticz. 
         Send messages as notifications or manage custom apps dynamically.
@@ -47,6 +47,7 @@ class BasePlugin:
         self.push_button_app = 5  # Device ID for Push Button 2
         self.push_button_previous = 6  # Device ID for Send Left
         self.push_button_next = 7  # Device ID for Send Right
+        self.push_button_rtttl = 8  # Device ID for RTTTL command
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -123,6 +124,15 @@ class BasePlugin:
                 Description="Trigger the 'nextapp' API command"
             ).Create()
             Domoticz.Log("Send Next Push Button created.")
+
+        if self.push_button_rtttl not in Devices:
+            Domoticz.Device(
+                Name="RTTTL Command",
+                Unit=self.push_button_rtttl,
+                Type=244, Subtype=73, Switchtype=9,
+                Description="The Simpsons:d=4,o=5,b=160:c.6,e6,f#6,8a6,g.6,e6,c6,8a,8f#,8f#,8f#,2g,8p,8p,8f#,8f#,8f#,8g,a#.,8c6,8c6,8c6,c6"
+            ).Create()
+            Domoticz.Log("RTTTL Command Push Button created.")
         
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
@@ -130,7 +140,16 @@ class BasePlugin:
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log(f"Command received: Unit={Unit}, Command={Command}, Level={Level}, Hue={Hue}")
         
-        if Unit == self.push_button_previous:
+        if Unit == self.push_button_rtttl:
+            description = Devices[Unit].Description
+            if description:
+                try:
+                    self.send_api_command_payload("rtttl", description)
+                    Domoticz.Log(f"RTTTL command sent successfully: {description}")
+                except Exception as e:
+                    Domoticz.Error(f"Error sending RTTTL command: {e}")
+                    
+        elif Unit == self.push_button_previous:
             try:
                 self.send_api_command("previousapp")
                 Domoticz.Log("Triggered 'previousapp' command successfully.")
@@ -217,6 +236,13 @@ class BasePlugin:
             Domoticz.Log(f"API command '{command}' executed successfully.")
         except requests.exceptions.RequestException as e:
             Domoticz.Error(f"Failed to send '{command}' command: {e}")
+
+    def send_api_command_payload(self, endpoint, payload):
+        url = f"http://{Parameters['Address']}:{Parameters['Port']}/api/{endpoint}"
+        headers = {"Content-Type": "application/json"}
+        auth = (Parameters['Username'], Parameters['Password']) if 'Username' in Parameters and 'Password' in Parameters else None
+        response = requests.post(url, headers=headers, json=payload, auth=auth)
+        response.raise_for_status()
 
     def send_notify_json(self, json_data):
         url = f"http://{self.awtrix_ip}/api/notify"
