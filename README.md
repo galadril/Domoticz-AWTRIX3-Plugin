@@ -14,6 +14,7 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Power Control:** Toggle the power state of the AWTRIX3 display.
 - **Temperature, Humidity, and Illumination:** Fetch and display temperature, humidity, and illumination stats.
 - **Push Button Notifications:** Use virtual devices to trigger notifications or custom applications based on button input.
+- **Send RTTL Sounds:** Use virtual devices to play RTTTL sounds on the device.
 - **Debugging Options:** Multiple levels of debugging to help you get precise information about the plugin activities.
 
 ## 🛠 Installation
@@ -43,6 +44,7 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Send Custom App:** Virtual device to send custom applications data via the AWTRIX3 API.
 - **Next App:** Navigate to the next app via the AWTRIX3 API.
 - **Previous App:** Navigate to the previous app via the AWTRIX3 API.
+- **RTTTL:** Start a RTTL Melodie on the device.
 
 ## 🚀 Usage
 ### Push Button Notifications
@@ -95,6 +97,7 @@ For more details on AWTRIX3 and how to upload/setup icons:
 |   0.0.2 | Fixed issue with Power Device |
 |   0.0.3 | Fixes on first use of hardware |
 |   0.0.4 | Added buttons for next and previous app navigation |
+|   0.0.5 | Added RTTTL Sounds |
 
 ## 🚀 Updates and Contributions
 This project is open-source and contributions are welcome! Visit the GitHub repository for more information: [Domoticz-AWTRIX3-Plugin](https://blueforcer.github.io/awtrix3/#/api?id=custom-apps-and-notifications).
