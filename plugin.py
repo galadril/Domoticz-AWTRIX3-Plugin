@@ -48,6 +48,7 @@ class BasePlugin:
         self.push_button_previous = 6  # Device ID for Send Left
         self.push_button_next = 7  # Device ID for Send Right
         self.push_button_rtttl = 8  # Device ID for RTTTL command
+        self.push_button_settings = 9  # Device ID for settings command
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -133,6 +134,15 @@ class BasePlugin:
                 Description="The Simpsons:d=4,o=5,b=160:c.6,e6,f#6,8a6,g.6,e6,c6,8a,8f#,8f#,8f#,2g,8p,8p,8f#,8f#,8f#,8g,a#.,8c6,8c6,8c6,c6"
             ).Create()
             Domoticz.Log("RTTTL Command Push Button created.")
+
+        if self.push_button_settings not in Devices:
+            Domoticz.Device(
+                Name="Send Settings",
+                Unit=self.push_button_settings,
+                Type=244, Subtype=73, Switchtype=9,
+                Description='{"KEY": "Enter JSON formatted settings here"}'
+            ).Create()
+            Domoticz.Log("Settings Push Button created.")
         
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
@@ -225,6 +235,23 @@ class BasePlugin:
 
         elif Unit == self.power_unit:  # Power Device
             self.send_power_device(Command)
+
+        elif Unit == self.push_button_settings:
+            description = Devices[Unit].Description.strip()
+            if not description:
+                Domoticz.Error("Description field is empty. Cannot send data.")
+                return
+
+            try:
+                # JSON input for settings
+                if description.startswith("{") and description.endswith("}"):
+                    self.send_settings_json(description)
+                    Domoticz.Log("Sent JSON data to settings API.")
+                else:
+                    Domoticz.Error(f"Description is not JSON formatted: {description}")
+            except Exception as e:
+                Domoticz.Error(f"Error processing settings description: {e}")
+
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
 
@@ -293,6 +320,16 @@ class BasePlugin:
             Domoticz.Log(f"Custom App message sent successfully: {response.text}")
         except requests.exceptions.RequestException as e:
             Domoticz.Error(f"Failed to send Custom App message: {e}")
+
+    def send_settings_json(self, json_data):
+        url = f"http://{self.awtrix_ip}/api/settings"
+        headers = {"Content-Type": "application/json"}
+        try:
+            response = requests.post(url, data=json_data, headers=headers, auth=(self.username, self.password))
+            response.raise_for_status()
+            Domoticz.Log(f"Settings JSON sent successfully: {response.text}")
+        except requests.exceptions.RequestException as e:
+            Domoticz.Error(f"Failed to send settings JSON: {e}")
 
     def send_power_device(self, Command):
         """ Toggles the power on/off for the AWTRIX device """

@@ -15,6 +15,7 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Temperature, Humidity, and Illumination:** Fetch and display temperature, humidity, and illumination stats.
 - **Push Button Notifications:** Use virtual devices to trigger notifications or custom applications based on button input.
 - **Send RTTL Sounds:** Use virtual devices to play RTTTL sounds on the device.
+- **Send Settings:** Use virtual device to change settings on the device.
 - **Debugging Options:** Multiple levels of debugging to help you get precise information about the plugin activities.
 
 ## 🛠 Installation
@@ -42,6 +43,7 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Temp+Hum Device:** Displays temperature and humidity levels with comfort index.
 - **Send Notification:** Virtual device to send notifications via the AWTRIX3 API.
 - **Send Custom App:** Virtual device to send custom applications data via the AWTRIX3 API.
+- **Send Settings:** Virtual device to send settings via the AWTRIX3 API.
 - **Next App:** Navigate to the next app via the AWTRIX3 API.
 - **Previous App:** Navigate to the previous app via the AWTRIX3 API.
 - **RTTTL:** Start a RTTL Melodie on the device.
@@ -84,6 +86,15 @@ You can find the icon pack under the `/icons` directory in the GitHub repository
 For more details on AWTRIX3 and how to upload/setup icons:
 [AWTRIX Icons Setup](https://blueforcer.github.io/awtrix3/#/icons)
 
+### Settings
+The description of the push button (`Send settings`) should be set to a JSON object, using the keys and values as defined by the [AWTRIX3 API](https://blueforcer.github.io/awtrix3/#change-settings).
+
+#### Example JSONs
+**Disable humidity and temperature JSON:**
+```json
+{ "HUM": 0, "TEMP": 0 }
+```
+ 
 ## 🌈 Samples
 ![Samples1](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/images/awtrix_door.gif?raw=true)
 ![Samples2](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/images/awtrix_fan.gif?raw=true)
