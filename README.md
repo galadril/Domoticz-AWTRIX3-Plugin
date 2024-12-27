@@ -15,7 +15,7 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Temperature, Humidity, and Illumination:** Fetch and display temperature, humidity, and illumination stats.
 - **Push Button Notifications:** Use virtual devices to trigger notifications or custom applications based on button input.
 - **Send RTTTL Sounds:** Use virtual devices to play RTTTL sounds on the device.
-- **Send Settings:** Use virtual device to change settings on the device.
+- **Send Settings:** Use virtual devices to change settings on the device.
 - **Debugging Options:** Multiple levels of debugging to help you get precise information about the plugin activities.
 
 ## 🛠 Installation
@@ -47,6 +47,8 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Next App:** Navigate to the next app via the AWTRIX3 API.
 - **Previous App:** Navigate to the previous app via the AWTRIX3 API.
 - **RTTTL:** Start a RTTTL Melodie on the device.
+- **Transition effect:** A selector to specify the transition between the applications.
+- **Overlay:** A selector to specify a 'weather' overlay to be shown on the AWTRIX3
 
 ## 🚀 Usage
 ### Push Button Notifications
