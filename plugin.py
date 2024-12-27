@@ -49,6 +49,7 @@ class BasePlugin:
         self.push_button_next = 7  # Device ID for Send Right
         self.push_button_rtttl = 8  # Device ID for RTTTL command
         self.push_button_settings = 9  # Device ID for settings command
+        self.selector_transition_effect = 10  # Device ID for selector of transition effect
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -144,6 +145,21 @@ class BasePlugin:
             ).Create()
             Domoticz.Log("Settings Push Button created.")
         
+        if self.selector_transition_effect not in Devices:
+            Options = {
+                "LevelActions": "|| ||",
+                "LevelNames": "Off|Random|Slide|Dim|Zoom|Rotate|Pixelate|Curtain|Ripple|Blink|Reload|Fade",
+                "LevelOffHidden": "true",
+                "SelectorStyle": "1"
+                }
+            Domoticz.Device(
+                Name="Transition effect",
+                Unit=self.selector_transition_effect,
+                TypeName="Selector Switch",
+                Options=Options
+            ).Create()
+            Domoticz.Log("Transition effect selector created.")
+
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
 
@@ -251,6 +267,16 @@ class BasePlugin:
                     Domoticz.Error(f"Description is not JSON formatted: {description}")
             except Exception as e:
                 Domoticz.Error(f"Error processing settings description: {e}")
+
+        elif Unit == self.selector_transition_effect:
+            transitionValue = (Level / 10) - 1
+            json = f'{{"TEFF": {transitionValue}}}'
+            try:
+                self.send_settings_json(json)
+                # Also set the value in the selector again, to confirm that it was set
+                Devices[self.selector_transition_effect].Update(nValue=Level, sValue=f"{Level}")
+            except Exception as e:
+                Domoticz.Error(f"Error sending the transition effect: {e}")
 
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
@@ -415,6 +441,24 @@ class BasePlugin:
             # Set the Power device state to OFF (0) if there's an error fetching stats
             Devices[self.power_unit].Update(nValue=0, sValue="OFF")
 
+        try:
+            url = f"http://{self.awtrix_ip}/api/settings"
+            response = requests.get(url, auth=HTTPBasicAuth(self.username, self.password) if self.username and self.password else None)
+            response.raise_for_status()
+
+            settings = response.json()
+
+            # Extract values from the stats response
+            val_teff = int(settings.get("TEFF", 1))  # Slide is the default
+            selector_value = (val_teff + 1) * 10
+
+            # Update the transition effect device
+            Devices[self.selector_transition_effect].Update(nValue=selector_value, sValue=f"{selector_value}")
+            Domoticz.Log(f'Updated transition effect device with nValue={selector_value}, sValue="{selector_value}".')
+        except requests.exceptions.RequestException as e:
+            Domoticz.Log(f"Failed to fetch AWTRIX settings: {str(e)}. Skipping update.")
+            # Set the transition effect device to 'OFF'
+            Devices[self.selector_transition_effect].Update(nValue=20, sValue="0")
 
     def onHeartbeat(self):
         """ Periodic task to fetch device stats and update the devices """
