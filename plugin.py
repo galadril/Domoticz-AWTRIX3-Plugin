@@ -50,6 +50,7 @@ class BasePlugin:
         self.push_button_rtttl = 8  # Device ID for RTTTL command
         self.push_button_settings = 9  # Device ID for settings command
         self.selector_transition_effect = 10  # Device ID for selector of transition effect
+        self.selector_overlay = 11  # Device ID for selector of overlay
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -159,6 +160,21 @@ class BasePlugin:
                 Options=Options
             ).Create()
             Domoticz.Log("Transition effect selector created.")
+
+        if self.selector_overlay not in Devices:
+            Options = {
+                "LevelActions": "|| ||",
+                "LevelNames": "Off|Snow|Rain|Drizzle|Storm|Thunder|Frost", # Off = Clear
+                "LevelOffHidden": "false",
+                "SelectorStyle": "1"
+                }
+            Domoticz.Device(
+                Name="Overlay",
+                Unit=self.selector_overlay,
+                TypeName="Selector Switch",
+                Options=Options
+            ).Create()
+            Domoticz.Log("Overlay selector created.")
 
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
@@ -277,6 +293,16 @@ class BasePlugin:
                 Devices[self.selector_transition_effect].Update(nValue=Level, sValue=f"{Level}")
             except Exception as e:
                 Domoticz.Error(f"Error sending the transition effect: {e}")
+        elif Unit == self.selector_overlay:
+            overlayMap = { 0: "clear", 10: "snow", 20: "rain", 30: "drizzle", 40: "storm", 50: "thunder", 60: "frost" }
+            overlayName = overlayMap.get(Level, "clear")
+            json = f'{{"OVERLAY": "{overlayName}"}}'
+            try:
+                self.send_settings_json(json)
+                # Also set the value in the selector again, to confirm that it was set
+                Devices[self.selector_overlay].Update(nValue=Level, sValue=f"{Level}")
+            except Exception as e:
+                Domoticz.Error(f"Error sending the overlay: {e}")
 
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
@@ -455,10 +481,16 @@ class BasePlugin:
             # Update the transition effect device
             Devices[self.selector_transition_effect].Update(nValue=selector_value, sValue=f"{selector_value}")
             Domoticz.Log(f'Updated transition effect device with nValue={selector_value}, sValue="{selector_value}".')
+
+            overlayMap = {"clear": 0, "snow": 10, "rain": 20, "drizzle": 30, "storm": 40, "thunder": 50, "frost": 60 }
+            overlay_value = overlayMap.get(settings.get("OVERLAY", "clear"), 0)
+            Devices[self.selector_overlay].Update(nValue=overlay_value, sValue=f"{overlay_value}")
+            Domoticz.Log(f'Updated overlay device with nValue={overlay_value}, sValue="{overlay_value}".')
         except requests.exceptions.RequestException as e:
             Domoticz.Log(f"Failed to fetch AWTRIX settings: {str(e)}. Skipping update.")
             # Set the transition effect device to 'OFF'
             Devices[self.selector_transition_effect].Update(nValue=20, sValue="0")
+            Devices[self.selector_overlay].Update(nValue=0, sValue="0")
 
     def onHeartbeat(self):
         """ Periodic task to fetch device stats and update the devices """
