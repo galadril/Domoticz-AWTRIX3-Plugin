@@ -89,12 +89,13 @@ For more details on AWTRIX3 and how to upload/setup icons:
 ### Settings
 The description of the push button (`Send settings`) should be set to a JSON object, using the keys and values as defined by the [AWTRIX3 API](https://blueforcer.github.io/awtrix3/#change-settings).
 
-#### Example JSONs
-**Disable humidity and temperature JSON:**
-```json
-{ "HUM": 0, "TEMP": 0 }
-```
- 
+#### Example JSONs for changing the global settings
+| Example                                       | JSON                                              |
+|-----------------------------------------------|---------------------------------------------------|
+| Disable battery, humidity and temperature     | `{ "BAT": false, "HUM": false, "TEMP": false }`   |
+| Enable weekday display, and use a green color | `{ "WD": true, "WDCA": [0, 255, 0] }`             |
+| Show every app for 10 seconds with 2 s change | `{ "ATIME": 10, "TSPEED": 2000 }`                 |
+
 ## 🌈 Samples
 ![Samples1](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/images/awtrix_door.gif?raw=true)
 ![Samples2](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/images/awtrix_fan.gif?raw=true)
