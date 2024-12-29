@@ -34,6 +34,7 @@
 import Domoticz
 import requests
 from requests.auth import HTTPBasicAuth
+import json
 
 class BasePlugin:
     def __init__(self):
@@ -51,12 +52,17 @@ class BasePlugin:
         self.push_button_settings = 9  # Device ID for settings command
         self.selector_transition_effect = 10  # Device ID for selector of transition effect
         self.selector_overlay = 11  # Device ID for selector of overlay
+        self.color_text = 12  # Device ID for the global text color
         self.debug_level = 0
 
         # Read username and password for basic auth
         self.username = ""
         self.password = ""
         self.default_icon = ""
+
+        # The last selected text color
+        self.color_white = { "r": 255, "g": 255, "b": 255 }
+        self.selected_text_color = self.color_white.copy()
 
     def onStart(self):
         Domoticz.Log("AWTRIX Plugin started.")
@@ -176,6 +182,14 @@ class BasePlugin:
             ).Create()
             Domoticz.Log("Overlay selector created.")
 
+        if self.color_text not in Devices:
+            Domoticz.Device(
+                Name="Text color",
+                Unit=self.color_text,
+                TypeName="RGB"
+            ).Create()
+            Domoticz.Log("Text color device created.")
+
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
 
@@ -286,9 +300,9 @@ class BasePlugin:
 
         elif Unit == self.selector_transition_effect:
             transitionValue = (Level / 10) - 1
-            json = f'{{"TEFF": {transitionValue}}}'
+            settings = f'{{"TEFF": {transitionValue}}}'
             try:
-                self.send_settings_json(json)
+                self.send_settings_json(settings)
                 # Also set the value in the selector again, to confirm that it was set
                 Devices[self.selector_transition_effect].Update(nValue=Level, sValue=f"{Level}")
             except Exception as e:
@@ -296,13 +310,43 @@ class BasePlugin:
         elif Unit == self.selector_overlay:
             overlayMap = { 0: "clear", 10: "snow", 20: "rain", 30: "drizzle", 40: "storm", 50: "thunder", 60: "frost" }
             overlayName = overlayMap.get(Level, "clear")
-            json = f'{{"OVERLAY": "{overlayName}"}}'
+            settings = f'{{"OVERLAY": "{overlayName}"}}'
             try:
-                self.send_settings_json(json)
+                self.send_settings_json(settings)
                 # Also set the value in the selector again, to confirm that it was set
                 Devices[self.selector_overlay].Update(nValue=Level, sValue=f"{Level}")
             except Exception as e:
                 Domoticz.Error(f"Error sending the overlay: {e}")
+
+        elif Unit == self.color_text:
+            # By default text color will be white
+            newColor = self.color_white.copy()
+            dimmer_state = 0
+            dimmer_level = Level
+            if Command == "Off":
+                # We will switch back to white
+                dimmer_level = 0
+            elif Command == "Set Level":
+                # Only the level is changed
+                # Set the same color as previously
+                dimmer_state = 1
+                newColor = self.selected_text_color
+            else:
+                dimmer_state = 1
+                if Hue:
+                    colorInfo = json.loads(Hue)
+                    newColor = { key: colorInfo.get(key, self.color_white[key]) for key in ['r', 'g', 'b'] }
+            try:
+                settings = f'{{ "TCOL": [{newColor["r"]},{newColor["g"]},{newColor["b"]}] }}'
+                self.send_settings_json(settings)
+                # Also set the color in the domoticz control, to confirm that it was set
+                color = { "ColorMode": 3 }
+                color.update(newColor)
+                Devices[self.color_text].Update(nValue=dimmer_state, sValue=str(dimmer_level), Color=str(color))
+                if dimmer_state:
+                    self.selected_text_color.update(newColor)
+            except Exception as e:
+                Domoticz.Error(f"Error sending the global text color: {e}")
 
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
@@ -486,6 +530,23 @@ class BasePlugin:
             overlay_value = overlayMap.get(settings.get("OVERLAY", "clear"), 0)
             Devices[self.selector_overlay].Update(nValue=overlay_value, sValue=f"{overlay_value}")
             Domoticz.Log(f'Updated overlay device with nValue={overlay_value}, sValue="{overlay_value}".')
+
+            text_color = settings.get("TCOL", None)
+            if text_color:
+                # Set the color in the domoticz control, to confirm that it was set
+                color = { "ColorMode": 3 }
+                color["r"] = (text_color >> 16) & 0xFF
+                color["g"] = (text_color >> 8) & 0xFF
+                color["b"] = text_color & 0xFF
+                dimmer_state = 1
+                dimmer_level = 50
+                if text_color == (256 ** 3) - 1:
+                    # The text color is full white, so the custom text color is off
+                    dimmer_state = 0
+                    dimmer_level = 0
+                Devices[self.color_text].Update(nValue=dimmer_state, sValue=str(dimmer_level), Color=str(color))
+                Domoticz.Log(f'Updated text color device with nValue={dimmer_state}, sValue="{dimmer_level}", Color={str(color)}.')
+
         except requests.exceptions.RequestException as e:
             Domoticz.Log(f"Failed to fetch AWTRIX settings: {str(e)}. Skipping update.")
             # Set the transition effect device to 'OFF'
