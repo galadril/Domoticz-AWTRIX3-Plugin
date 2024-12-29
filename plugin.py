@@ -53,6 +53,9 @@ class BasePlugin:
         self.selector_transition_effect = 10  # Device ID for selector of transition effect
         self.selector_overlay = 11  # Device ID for selector of overlay
         self.color_text = 12  # Device ID for the global text color
+        self.brightness_unit = 13  # Device ID for the brightness slider
+        self.auto_brightness_unit = 14  # Device ID for the auto brightness switch
+
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -190,6 +193,22 @@ class BasePlugin:
             ).Create()
             Domoticz.Log("Text color device created.")
 
+        if self.brightness_unit not in Devices:
+            Domoticz.Device(
+                Name="Brightness",
+                Unit=self.brightness_unit,
+                TypeName="Dimmer"
+            ).Create()
+            Domoticz.Log("Brightness slider device created.")
+
+        if self.auto_brightness_unit not in Devices:
+            Domoticz.Device(
+                Name="Auto brightness",
+                Unit=self.auto_brightness_unit,
+                Type=244, Subtype=73, Switchtype=0
+            ).Create()
+            Domoticz.Log("Auto brigthness switch device created.")
+            
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
 
@@ -348,6 +367,28 @@ class BasePlugin:
             except Exception as e:
                 Domoticz.Error(f"Error sending the global text color: {e}")
 
+        elif Unit == self.brightness_unit:
+            bri = Level
+            if Command == "Off":
+                bri = 1
+            bri = max(1, min(bri, 100))
+            settings = f'{{ "BRI": {bri} }}'
+            try:
+                self.send_settings_json(settings)
+                percentage = max(1, min(bri, 100)) 
+                Devices[self.brightness_unit].Update(nValue=1, sValue=str(percentage))
+            except Exception as e:
+                Domoticz.Error(f"Error sending the brightness: {e}")
+
+        elif Unit == self.auto_brightness_unit:
+            value = 1 if Command == "On" else 0
+            settings = f'{{ "ABRI": {value} }}'
+            try:
+                self.send_settings_json(settings)
+                Devices[self.auto_brightness_unit].Update(nValue=value, sValue=str(value))
+            except Exception as e:
+                Domoticz.Error(f"Error sending the auto brightness: {e}")
+                
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
 
@@ -547,6 +588,12 @@ class BasePlugin:
                 Devices[self.color_text].Update(nValue=dimmer_state, sValue=str(dimmer_level), Color=str(color))
                 Domoticz.Log(f'Updated text color device with nValue={dimmer_state}, sValue="{dimmer_level}", Color={str(color)}.')
 
+            auto_bri = settings.get("ABRI", False)
+            Devices[self.auto_brightness_unit].Update(nValue=auto_bri, sValue=str(auto_bri))
+            bri = int(settings.get("BRI", 50))
+            bri = max(1, min(bri, 100))
+            Devices[self.brightness_unit].Update(nValue=1, sValue=str(bri))
+            Domoticz.Log(f'Update brightness device to: {bri} %. Auto brightness: {auto_bri}')
         except requests.exceptions.RequestException as e:
             Domoticz.Log(f"Failed to fetch AWTRIX settings: {str(e)}. Skipping update.")
             # Set the transition effect device to 'OFF'
