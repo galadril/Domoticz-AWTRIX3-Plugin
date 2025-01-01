@@ -5,7 +5,7 @@ return {
     -- Trigger section: run the script every 1 minute
     on = {
         timer = {
-            'every 5 minutes'
+            'every 1 minutes'
         }
     },
 
@@ -21,7 +21,7 @@ return {
         end
         
         -- Fetch the weather device
-        local weatherDevice = domoticz.devices(1452) -- idx of 'Buiten temperatuur'
+        local weatherDevice = domoticz.devices("Buiten temperatuur") -- 'Your outside weather device'
         if not weatherDevice then
             domoticz.log("Weather device not found!", domoticz.LOG_ERROR)
             return
