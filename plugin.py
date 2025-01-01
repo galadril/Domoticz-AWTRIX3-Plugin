@@ -34,6 +34,7 @@
 import Domoticz
 import requests
 from requests.auth import HTTPBasicAuth
+import json
 
 class BasePlugin:
     def __init__(self):
@@ -49,12 +50,21 @@ class BasePlugin:
         self.push_button_next = 7  # Device ID for Send Right
         self.push_button_rtttl = 8  # Device ID for RTTTL command
         self.push_button_settings = 9  # Device ID for settings command
+        self.selector_transition_effect = 10  # Device ID for selector of transition effect
+        self.selector_overlay = 11  # Device ID for selector of overlay
+        self.color_text = 12  # Device ID for the global text color
+        self.brightness_unit = 13  # Device ID for the brightness slider
+
         self.debug_level = 0
 
         # Read username and password for basic auth
         self.username = ""
         self.password = ""
         self.default_icon = ""
+
+        # The last selected text color
+        self.color_white = { "r": 255, "g": 255, "b": 255 }
+        self.selected_text_color = self.color_white.copy()
 
     def onStart(self):
         Domoticz.Log("AWTRIX Plugin started.")
@@ -144,6 +154,52 @@ class BasePlugin:
             ).Create()
             Domoticz.Log("Settings Push Button created.")
         
+        if self.selector_transition_effect not in Devices:
+            Options = {
+                "LevelActions": "|| ||",
+                "LevelNames": "Off|Random|Slide|Dim|Zoom|Rotate|Pixelate|Curtain|Ripple|Blink|Reload|Fade",
+                "LevelOffHidden": "true",
+                "SelectorStyle": "1"
+                }
+            Domoticz.Device(
+                Name="Transition effect",
+                Unit=self.selector_transition_effect,
+                TypeName="Selector Switch",
+                Options=Options
+            ).Create()
+            Domoticz.Log("Transition effect selector created.")
+
+        if self.selector_overlay not in Devices:
+            Options = {
+                "LevelActions": "|| ||",
+                "LevelNames": "Off|Snow|Rain|Drizzle|Storm|Thunder|Frost", # Off = Clear
+                "LevelOffHidden": "false",
+                "SelectorStyle": "1"
+                }
+            Domoticz.Device(
+                Name="Overlay",
+                Unit=self.selector_overlay,
+                TypeName="Selector Switch",
+                Options=Options
+            ).Create()
+            Domoticz.Log("Overlay selector created.")
+
+        if self.color_text not in Devices:
+            Domoticz.Device(
+                Name="Text color",
+                Unit=self.color_text,
+                TypeName="RGB"
+            ).Create()
+            Domoticz.Log("Text color device created.")
+
+        if self.brightness_unit not in Devices:
+            Domoticz.Device(
+                Name="Brightness",
+                Unit=self.brightness_unit,
+                TypeName="Dimmer"
+            ).Create()
+            Domoticz.Log("Brightness slider device created.")
+
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
 
@@ -251,6 +307,70 @@ class BasePlugin:
                     Domoticz.Error(f"Description is not JSON formatted: {description}")
             except Exception as e:
                 Domoticz.Error(f"Error processing settings description: {e}")
+
+        elif Unit == self.selector_transition_effect:
+            transitionValue = (Level / 10) - 1
+            settings = f'{{"TEFF": {transitionValue}}}'
+            try:
+                self.send_settings_json(settings)
+                # Also set the value in the selector again, to confirm that it was set
+                Devices[self.selector_transition_effect].Update(nValue=Level, sValue=f"{Level}")
+            except Exception as e:
+                Domoticz.Error(f"Error sending the transition effect: {e}")
+        elif Unit == self.selector_overlay:
+            overlayMap = { 0: "clear", 10: "snow", 20: "rain", 30: "drizzle", 40: "storm", 50: "thunder", 60: "frost" }
+            overlayName = overlayMap.get(Level, "clear")
+            settings = f'{{"OVERLAY": "{overlayName}"}}'
+            try:
+                self.send_settings_json(settings)
+                # Also set the value in the selector again, to confirm that it was set
+                Devices[self.selector_overlay].Update(nValue=Level, sValue=f"{Level}")
+            except Exception as e:
+                Domoticz.Error(f"Error sending the overlay: {e}")
+
+        elif Unit == self.color_text:
+            # By default text color will be white
+            newColor = self.color_white.copy()
+            dimmer_state = 0
+            dimmer_level = Level
+            if Command == "Off":
+                # We will switch back to white
+                dimmer_level = 0
+            elif Command == "Set Level":
+                # Only the level is changed
+                # Set the same color as previously
+                dimmer_state = 1
+                newColor = self.selected_text_color
+            else:
+                dimmer_state = 1
+                if Hue:
+                    colorInfo = json.loads(Hue)
+                    newColor = { key: colorInfo.get(key, self.color_white[key]) for key in ['r', 'g', 'b'] }
+            try:
+                settings = f'{{ "TCOL": [{newColor["r"]},{newColor["g"]},{newColor["b"]}] }}'
+                self.send_settings_json(settings)
+                # Also set the color in the domoticz control, to confirm that it was set
+                color = { "ColorMode": 3 }
+                color.update(newColor)
+                Devices[self.color_text].Update(nValue=dimmer_state, sValue=str(dimmer_level), Color=str(color))
+                if dimmer_state:
+                    self.selected_text_color.update(newColor)
+            except Exception as e:
+                Domoticz.Error(f"Error sending the global text color: {e}")
+
+        elif Unit == self.brightness_unit:
+            bri = Level
+            auto_bri = False
+            if Command == "Off":
+                bri = 0
+                auto_bri = True
+            bri = max(0, min(bri, 100))
+            settings = f'{{ "ABRI": {int(auto_bri)}, "BRI": {bri} }}'
+            try:
+                self.send_settings_json(settings)
+                Devices[self.brightness_unit].Update(nValue=int(not auto_bri), sValue=str(bri))
+            except Exception as e:
+                Domoticz.Error(f"Error sending the brightness: {e}")
 
         else:
             Domoticz.Error("Unknown Unit in onCommand.")
@@ -415,6 +535,52 @@ class BasePlugin:
             # Set the Power device state to OFF (0) if there's an error fetching stats
             Devices[self.power_unit].Update(nValue=0, sValue="OFF")
 
+        try:
+            url = f"http://{self.awtrix_ip}/api/settings"
+            response = requests.get(url, auth=HTTPBasicAuth(self.username, self.password) if self.username and self.password else None)
+            response.raise_for_status()
+
+            settings = response.json()
+
+            # Extract values from the stats response
+            val_teff = int(settings.get("TEFF", 1))  # Slide is the default
+            selector_value = (val_teff + 1) * 10
+
+            # Update the transition effect device
+            Devices[self.selector_transition_effect].Update(nValue=selector_value, sValue=f"{selector_value}")
+            Domoticz.Log(f'Updated transition effect device with nValue={selector_value}, sValue="{selector_value}".')
+
+            overlayMap = {"clear": 0, "snow": 10, "rain": 20, "drizzle": 30, "storm": 40, "thunder": 50, "frost": 60 }
+            overlay_value = overlayMap.get(settings.get("OVERLAY", "clear"), 0)
+            Devices[self.selector_overlay].Update(nValue=overlay_value, sValue=f"{overlay_value}")
+            Domoticz.Log(f'Updated overlay device with nValue={overlay_value}, sValue="{overlay_value}".')
+
+            text_color = settings.get("TCOL", None)
+            if text_color:
+                # Set the color in the domoticz control, to confirm that it was set
+                color = { "ColorMode": 3 }
+                color["r"] = (text_color >> 16) & 0xFF
+                color["g"] = (text_color >> 8) & 0xFF
+                color["b"] = text_color & 0xFF
+                dimmer_state = 1
+                dimmer_level = 50
+                if text_color == (256 ** 3) - 1:
+                    # The text color is full white, so the custom text color is off
+                    dimmer_state = 0
+                    dimmer_level = 0
+                Devices[self.color_text].Update(nValue=dimmer_state, sValue=str(dimmer_level), Color=str(color))
+                Domoticz.Log(f'Updated text color device with nValue={dimmer_state}, sValue="{dimmer_level}", Color={str(color)}.')
+
+            auto_bri = settings.get("ABRI", False)
+            bri = int(settings.get("BRI", 50))
+            bri = max(1, min(bri, 100))
+            Devices[self.brightness_unit].Update(nValue=int(not auto_bri), sValue=str(bri))
+            Domoticz.Log(f'Update brightness device with nValue={int(not auto_bri)}, sValue="{bri}"')
+        except requests.exceptions.RequestException as e:
+            Domoticz.Log(f"Failed to fetch AWTRIX settings: {str(e)}. Skipping update.")
+            # Set the transition effect device to 'OFF'
+            Devices[self.selector_transition_effect].Update(nValue=20, sValue="0")
+            Devices[self.selector_overlay].Update(nValue=0, sValue="0")
 
     def onHeartbeat(self):
         """ Periodic task to fetch device stats and update the devices """
