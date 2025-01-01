@@ -50,7 +50,7 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 - **Transition effect:** A selector to specify the transition between the applications.
 - **Overlay:** A selector to specify a 'weather' overlay to be shown on the AWTRIX3.
 - **Text color:** A RGB color selector to change the global color text color. 
-- **(Auto) Brightness:** Allows to control the brightness of the AWTRIX3.
+- **Brightness:** Allows to control the (auto) brightness of the AWTRIX3.
 
 ## 🚀 Usage
 ### Push Button Notifications
