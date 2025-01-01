@@ -94,7 +94,7 @@ For more details on AWTRIX3 and how to upload/setup icons:
 [AWTRIX Icons Setup](https://blueforcer.github.io/awtrix3/#/icons)
 
 ### Settings
-The description of the push button (`Send settings`) should be set to a JSON object, using the keys and values as defined by the [AWTRIX3 API](https://blueforcer.github.io/awtrix3/#change-settings).
+The description of the push button (`Send settings`) should be set to a JSON object, using the keys and values as defined by the [AWTRIX3 API](https://blueforcer.github.io/awtrix3/#/api?id=change-settings).
 
 #### Example JSONs for changing the global settings
 | Example                                       | JSON                                              |
