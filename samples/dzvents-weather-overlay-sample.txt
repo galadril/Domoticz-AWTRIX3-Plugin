@@ -11,7 +11,7 @@ return {
 
     logging = {
         level = domoticz.LOG_INFO,
-        marker = "AWTRIX3 Overlay"
+        marker = "AWTRIX3_OVERLAY"
     },
 
     execute = function(domoticz)
@@ -69,7 +69,7 @@ return {
         end
 
         -- Fetch the Awtrix3 selector switch for overlay
-        local awtrixOverlaySelector = domoticz.devices("Overlay")
+        local awtrixOverlaySelector = domoticz.devices("AWTRIX3 - Overlay")
 
         if not awtrixOverlaySelector then
             domoticz.log("Awtrix3 overlay selector switch not found!", domoticz.LOG_ERROR)
