@@ -1,0 +1,91 @@
+-- dzVents script to set Awtrix3 clock overlay based on weather
+return {
+    active = true, -- Set script as active
+
+    -- Trigger section: run the script every 1 minute
+    on = {
+        timer = {
+            'every 5 minutes'
+        }
+    },
+
+    logging = {
+        level = domoticz.LOG_INFO,
+        marker = "AWTRIX3 Overlay"
+    },
+
+    execute = function(domoticz)
+        local powerDevice = domoticz.devices("AWTRIX3 - Power")
+        if not powerDevice or powerDevice.state ~= "On" then
+            return
+        end
+        
+        -- Fetch the weather device
+        local weatherDevice = domoticz.devices(1452) -- idx of 'Buiten temperatuur'
+        if not weatherDevice then
+            domoticz.log("Weather device not found!", domoticz.LOG_ERROR)
+            return
+        end
+
+        -- Extract weather details
+        local temp = weatherDevice.temperature
+        local forecast = weatherDevice.forecastString
+
+        if temp then
+            domoticz.log("Current temperature: " .. temp .. "°C", domoticz.LOG_INFO)
+        else
+            domoticz.log("Temperature data is missing!", domoticz.LOG_ERROR)
+        end
+
+        if forecast then
+            domoticz.log("Weather forecast: " .. forecast, domoticz.LOG_INFO)
+        else
+            domoticz.log("Forecast data is missing!", domoticz.LOG_ERROR)
+        end
+
+        -- Determine overlay based on weather conditions
+        local overlayLevel
+        if forecast and forecast:find("Snow") then
+            overlayLevel = 2 -- "Snow"
+            domoticz.log("Forecast indicates snow. Setting overlay to 'Snow'.", domoticz.LOG_DEBUG)
+        elseif forecast and forecast:find("Rain") then
+            overlayLevel = 3 -- "Rain"
+            domoticz.log("Forecast indicates rain. Setting overlay to 'Rain'.", domoticz.LOG_DEBUG)
+        elseif forecast and forecast:find("Drizzle") then
+            overlayLevel = 4 -- "Drizzle"
+            domoticz.log("Forecast indicates drizzle. Setting overlay to 'Drizzle'.", domoticz.LOG_DEBUG)
+        elseif forecast and forecast:find("Storm") then
+            overlayLevel = 5 -- "Storm"
+            domoticz.log("Forecast indicates storm. Setting overlay to 'Storm'.", domoticz.LOG_DEBUG)
+        elseif forecast and forecast:find("Thunder") then
+            overlayLevel = 6 -- "Thunder"
+            domoticz.log("Forecast indicates thunder. Setting overlay to 'Thunder'.", domoticz.LOG_DEBUG)
+        elseif temp and temp < 0 then
+            overlayLevel = 7 -- "Frost"
+            domoticz.log("Temperature below freezing. Setting overlay to 'Frost'.", domoticz.LOG_DEBUG)
+        else
+            overlayLevel = 1 -- "Off" (Clear)
+            domoticz.log("No specific weather condition detected or data missing. Setting overlay to 'Off'.", domoticz.LOG_DEBUG)
+        end
+
+        -- Fetch the Awtrix3 selector switch for overlay
+        local awtrixOverlaySelector = domoticz.devices("Overlay")
+
+        if not awtrixOverlaySelector then
+            domoticz.log("Awtrix3 overlay selector switch not found!", domoticz.LOG_ERROR)
+            return
+        end
+
+        domoticz.log("Overlay selector device found: " .. awtrixOverlaySelector.name, domoticz.LOG_DEBUG)
+
+        -- Set the overlay level on the Awtrix3 device
+        if awtrixOverlaySelector.level ~= overlayLevel then
+            awtrixOverlaySelector.switchSelector(overlayLevel)
+            domoticz.log("Set Awtrix3 overlay to level: " .. overlayLevel, domoticz.LOG_INFO)
+        else
+            domoticz.log("Awtrix3 overlay already set to level: " .. overlayLevel, domoticz.LOG_DEBUG)
+        end
+
+        domoticz.log("Awtrix3 Weather Overlay script finished.", domoticz.LOG_INFO)
+    end
+}
