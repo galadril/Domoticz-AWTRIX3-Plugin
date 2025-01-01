@@ -46,25 +46,25 @@ return {
         -- Determine overlay based on weather conditions
         local overlayLevel
         if forecast and forecast:find("Snow") then
-            overlayLevel = 2 -- "Snow"
+            overlayLevel = 10 -- "Snow"
             domoticz.log("Forecast indicates snow. Setting overlay to 'Snow'.", domoticz.LOG_DEBUG)
         elseif forecast and forecast:find("Rain") then
-            overlayLevel = 3 -- "Rain"
+            overlayLevel = 20 -- "Rain"
             domoticz.log("Forecast indicates rain. Setting overlay to 'Rain'.", domoticz.LOG_DEBUG)
         elseif forecast and forecast:find("Drizzle") then
-            overlayLevel = 4 -- "Drizzle"
+            overlayLevel = 30 -- "Drizzle"
             domoticz.log("Forecast indicates drizzle. Setting overlay to 'Drizzle'.", domoticz.LOG_DEBUG)
         elseif forecast and forecast:find("Storm") then
-            overlayLevel = 5 -- "Storm"
+            overlayLevel = 40 -- "Storm"
             domoticz.log("Forecast indicates storm. Setting overlay to 'Storm'.", domoticz.LOG_DEBUG)
         elseif forecast and forecast:find("Thunder") then
-            overlayLevel = 6 -- "Thunder"
+            overlayLevel = 50 -- "Thunder"
             domoticz.log("Forecast indicates thunder. Setting overlay to 'Thunder'.", domoticz.LOG_DEBUG)
         elseif temp and temp < 0 then
-            overlayLevel = 7 -- "Frost"
+            overlayLevel = 60 -- "Frost"
             domoticz.log("Temperature below freezing. Setting overlay to 'Frost'.", domoticz.LOG_DEBUG)
         else
-            overlayLevel = 1 -- "Off" (Clear)
+            overlayLevel = 0 -- "Off" (Clear)
             domoticz.log("No specific weather condition detected or data missing. Setting overlay to 'Off'.", domoticz.LOG_DEBUG)
         end
 
