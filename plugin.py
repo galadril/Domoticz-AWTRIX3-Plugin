@@ -36,6 +36,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import json.decoder
+import re
 
 class BasePlugin:
     def __init__(self):
@@ -423,8 +424,12 @@ class BasePlugin:
             json_list = jd if isinstance(jd, list) else [jd]
             for app in json_list:
                 appname = app.get("appname", "")
-                if appname:
-                    return appname
+                # Only keep valid characters as it will be passed on an URL
+                sanitized_appname = re.sub(r'[^a-zA-Z0-9_]', '', appname)
+                if sanitized_appname:
+                    if sanitized_appname != appname:
+                        Domoticz.Error(f"appname: '{appname}' was sanitized to: '{sanitized_appname}'")
+                    return sanitized_appname
         except json.decoder.JSONDecodeError as e:
             Domoticz.Error(f"Invalid JSON data passed: {json_data}")
 
