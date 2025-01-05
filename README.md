@@ -127,7 +127,7 @@ This project is open-source and contributions are welcome! Visit the GitHub repo
 
 ## 🙏 Acknowledgements
 - [Domoticz Plugin Wiki](https://www.domoticz.com/wiki/Plugins)
-- [Awtrix3 Official Documentation](https://awtrixdocs.blueforcer.de)
+- [Awtrix3 Official Documentation](https://blueforcer.github.io/awtrix3/#/README)
 
 # ☕ Donation
 If you like to say thanks, you could always buy me a cup of coffee (/beer)!
