@@ -17,11 +17,6 @@ return {
 
     -- Event execution when the timer triggers the script
     execute = function(domoticz)
-        local powerDevice = domoticz.devices("AWTRIX3 - Power")
-        if not powerDevice or powerDevice.state ~= "On" then
-            return
-        end
-
         local appNextDevice = domoticz.devices('AWTRIX3 - Next App')
         appNextDevice.switchOn()
     end

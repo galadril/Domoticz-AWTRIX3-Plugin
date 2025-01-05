@@ -48,15 +48,6 @@ return {
             ["Gas"] = { icon = 54633, type = "gas" }
         }
         
-        -- Check if the "AWTRIX3 - Power" device is on
-        local powerDevice = domoticz.devices("AWTRIX3 - Power")
-        if not powerDevice or powerDevice.state ~= "On" then
-            domoticz.log("AWTRIX3 - Power device is off. Skipping status updates.", domoticz.LOG_INFO)
-            return
-        else
-            domoticz.log("AWTRIX3 - Power device is on. Proceeding with status updates.", domoticz.LOG_INFO)
-        end
-
         local statuses = {}
 
         -- Function to generate JSON description ({"text": "status", "icon": icon})
