@@ -51,21 +51,21 @@ def validate_plugin_structure(plugin_data):
         assert params is not None, "'params' tag not found"
         
         print("INFO: Plugin structure is valid.")
-        sys.stdout.flush()  # Ensures the outputs are flushed and displayed
+        sys.stdout.flush()
         return True
 
     except AssertionError as e:
         print(f"ERROR: Validation error: {e}")
         sys.stdout.flush()
-        return False
+        sys.exit(1)  # Exit with a non-zero status code for validation errors
     except ET.ParseError as e:
         print(f"ERROR: XML parsing error: {e}")
         sys.stdout.flush()
-        return False
+        sys.exit(1)  # Exit with a non-zero status code for parsing errors
     except Exception as e:
         print(f"ERROR: Unexpected error during validation: {e}")
         sys.stdout.flush()
-        return False
+        sys.exit(1)  # Exit with a non-zero status code for unexpected errors
 
 if __name__ == "__main__":
     file_path = "plugin.py"
@@ -78,3 +78,4 @@ if __name__ == "__main__":
     else:
         print("ERROR: No XML header found in plugin.py")
         sys.stdout.flush()
+        sys.exit(1)  # Exit with a non-zero status code if no XML header is found
