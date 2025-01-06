@@ -57,6 +57,7 @@ Dive into the world of smart home technology by integrating your AWTRIX3 Smart P
 The description of the push buttons (`Send Notification` and `Send Custom App`) can be used in three ways:
 1. **JSON:**
    - Example: `{ "text": "600 L", "icon": 9766 }`
+   - Multi page example `[{ "text": "600 L", "icon": 9766 }, { "text": "364 W", "icon": 95 }]`
 2. **Icon;Message:**
    - Format: `icon;message`
    - Example: `9766;Check the temperature!`
@@ -86,6 +87,10 @@ If you like to use dzVents to set the description of the notification and custom
 For more details on all JSON options:
 [Custom Apps and Notifications](https://blueforcer.github.io/awtrix3/#/api?id=custom-apps-and-notifications)
 
+If multiple dzVents scripts are used to send different 'Custom Apps' to the AWTRIX3
+using the 'Send Custom App' button, it is best to also include an "appname" key and an appropriate
+value in the JSON data, as otherwise the 'Custom Apps' of the other dzVents scripts will be overwritten.
+ 
 ### Icons
 To display icons on the AWTRIX3 device, you need to manually upload them. You can fetch icons from the [LaMetric Developer Site](https://developer.lametric.com/icons).
 

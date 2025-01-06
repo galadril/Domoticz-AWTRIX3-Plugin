@@ -35,6 +35,8 @@ import Domoticz
 import requests
 from requests.auth import HTTPBasicAuth
 import json
+import json.decoder
+import re
 
 class BasePlugin:
     def __init__(self):
@@ -415,10 +417,28 @@ class BasePlugin:
         except requests.exceptions.RequestException as e:
             Domoticz.Error(f"Failed to send Notify message: {e}")
 
+    def _determine_custom_app_name(self, json_data):
+        appname = self.custom_app_name
+        try:
+            jd = json.loads(json_data)
+            json_list = jd if isinstance(jd, list) else [jd]
+            for app in json_list:
+                appname = app.get("appname", "")
+                # Only keep valid characters as it will be passed on an URL
+                sanitized_appname = re.sub(r'[^a-zA-Z0-9_]', '', appname)
+                if sanitized_appname:
+                    if sanitized_appname != appname:
+                        Domoticz.Error(f"appname: '{appname}' was sanitized to: '{sanitized_appname}'")
+                    return sanitized_appname
+        except json.decoder.JSONDecodeError as e:
+            Domoticz.Error(f"Invalid JSON data passed: {json_data}")
+
+        return self.custom_app_name
+
     def send_custom_app_json(self, json_data):
         url = f"http://{self.awtrix_ip}/api/custom"
         headers = {"Content-Type": "application/json"}
-        p = {"name": self.custom_app_name}
+        p = {"name": self._determine_custom_app_name(json_data) }
         try:
             response = requests.post(url, data=json_data, params=p, headers=headers, auth=(self.username, self.password))
             response.raise_for_status()
