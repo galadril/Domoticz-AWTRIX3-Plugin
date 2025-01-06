@@ -24,6 +24,11 @@ jobs:
       with:
         python-version: '3.9'
 
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+
     - name: Validate Plugin Structure
       run: |
         source venv/bin/activate
