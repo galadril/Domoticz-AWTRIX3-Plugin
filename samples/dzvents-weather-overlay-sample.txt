@@ -15,11 +15,6 @@ return {
     },
 
     execute = function(domoticz)
-        local powerDevice = domoticz.devices("AWTRIX3 - Power")
-        if not powerDevice or powerDevice.state ~= "On" then
-            return
-        end
-        
         -- Fetch the weather device
         local weatherDevice = domoticz.devices("Buiten temperatuur") -- 'Your outside weather device'
         if not weatherDevice then
