@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import sys
 
 def validate_plugin_structure(plugin_data):
     print("INFO: Starting plugin structure validation.")
@@ -36,14 +37,18 @@ def validate_plugin_structure(plugin_data):
             assert param is not None, f"'param' with 'field={field}' not found"
         
         print("INFO: Plugin structure is valid.")
+        sys.stdout.flush()  # Ensures the outputs are flushed and displayed
         return True
 
     except AssertionError as e:
         print(f"ERROR: Validation error: {e}")
+        sys.stdout.flush()
         return False
     except ET.ParseError as e:
         print(f"ERROR: XML parsing error: {e}")
+        sys.stdout.flush()
         return False
     except Exception as e:
         print(f"ERROR: Unexpected error during validation: {e}")
+        sys.stdout.flush()
         return False
