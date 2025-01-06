@@ -3,26 +3,24 @@ import sys
 
 def extract_plugin_header(file_path):
     """Extract the XML plugin header from a specified file."""
-    plugin_header = ""
+    plugin_header = []
     with open(file_path, "r") as f:
         lines = f.readlines()
         header_started = False
         for line in lines:
             stripped_line = line.strip()
-            # Detect start of the header
             if stripped_line.startswith('"""') and not header_started:
                 header_started = True
-                stripped_line = stripped_line[3:].lstrip()  # Remove initial triple quotes and whitespace
-            # Detect end of the header
+                # Remove the initial triple quotes, but keep this line as it may contain more content.
+                plugin_header.append(stripped_line[3:].lstrip())
             elif stripped_line.endswith('"""') and header_started:
-                stripped_line = stripped_line[:-3]  # Remove final triple quotes
-                plugin_header += stripped_line
+                # Append up to before closing triple quotes.
+                plugin_header.append(stripped_line[:-3])
                 break
-            
-            if header_started:
-                plugin_header += line
+            elif header_started:
+                plugin_header.append(line.rstrip())  # Add each line, removing newline characters
 
-    return plugin_header
+    return '\n'.join(plugin_header)
 
 def validate_plugin_structure(plugin_data):
     print("INFO: Starting plugin structure validation.")
@@ -77,12 +75,12 @@ def validate_plugin_structure(plugin_data):
         return False
 
 if __name__ == "__main__":
-    # Specify the path to your plugin.py file
     file_path = "plugin.py"
     
-    # Extract plugin header and validate
     plugin_data = extract_plugin_header(file_path)
     if plugin_data:
+        print("INFO: Extracted plugin header:")
+        print(plugin_data)
         validate_plugin_structure(plugin_data)
     else:
         print("ERROR: No XML header found in plugin.py")
