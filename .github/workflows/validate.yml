@@ -1,0 +1,43 @@
+name: ValidatePlugin
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:  # Allows for manual triggering of the workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install requests flake8 coverage
+
+    - name: Validate Plugin Structure
+      run: |
+        source venv/bin/activate
+        python .github/scripts/validate_plugin.py
+      # Ensure failure if validation fails
+      continue-on-error: false
+
+    - name: Lint with flake8
+      run: |
+        source venv/bin/activate
+        flake8 --max-line-length=120 .
