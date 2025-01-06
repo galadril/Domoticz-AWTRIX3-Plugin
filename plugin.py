@@ -1,5 +1,5 @@
 """
-<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.7" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
+<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.8" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
     <description>
         <p>
         Plugin for integrating AWTRIX3 Smart Pixel Clock with Domoticz. 
@@ -44,6 +44,7 @@ class BasePlugin:
         # Initialization of variables
         self.awtrix_ip = None
         self.custom_app_name = "Domoticz"  # Fixed app name for the custom app
+        self.awtrix3_icon_name = "AWTRIX3"  # Fixed icon id
         self.power_unit = 1  # Device ID for the Power
         self.lux_unit = 2  # Device ID for Lux
         self.temp_unit = 3  # Device ID for Temperature/Humidity
@@ -57,7 +58,7 @@ class BasePlugin:
         self.selector_overlay = 11  # Device ID for selector of overlay
         self.color_text = 12  # Device ID for the global text color
         self.brightness_unit = 13  # Device ID for the brightness slider
-
+        
         self.debug_level = 0
 
         # Read username and password for basic auth
@@ -84,14 +85,25 @@ class BasePlugin:
             Domoticz.Debug(f"Debug level set to: {self.debug_level}")
             Domoticz.Debug(f"AWTRIX IP: {self.awtrix_ip}")
 
+        # Load custom icons
+        self.load_icons(Images)
+
         # Create devices if they don't already exist
         self.create_devices()
         
         Domoticz.Heartbeat(30)
+
+    def load_icons(self, Images):
+        """Load the custom AWTRIX3 icon."""
+        if self.awtrix3_icon_name in Images:
+            Domoticz.Debug(f"Icon ID found: {Images[self.awtrix3_icon_name].ID}")
+        else:
+            Domoticz.Image("AWTRIX3-Icons.zip").Create()
+            Domoticz.Log("Icons added from AWTRIX3-Icons.zip")
         
     def create_devices(self):
         if self.power_unit not in Devices:
-            Domoticz.Device(Name="Power", Unit=self.power_unit, TypeName="Switch").Create()
+            Domoticz.Device(Name="Power", Unit=self.power_unit, TypeName="Switch", Image=Images[self.awtrix3_icon_name].ID).Create()
             Domoticz.Log("Power Device created.")
             self.send_notify_message(self.default_icon, "Domoticz")
 
