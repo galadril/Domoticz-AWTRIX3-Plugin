@@ -37,5 +37,5 @@ jobs:
     - name: Check Python syntax
       run: |
         source venv/bin/activate
-        python -m compileall -q .
+        python -m compileall .
       continue-on-error: false
