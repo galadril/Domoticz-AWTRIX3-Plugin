@@ -11,23 +11,7 @@
         A list of shared AWTRIX 3 automation flows is available on the <a href="https://flows.blueforcer.de/search?provider=domoticz">AWTRIX Flows website</a>.
         </p>
     </description>
-    <params>
-        <param field="Address" label="IP Address" width="200px" required="true" default="192.168.1.100"/>
-        <param field="Username" label="Username" width="200px" required="false" default=""/>
-        <param field="Password" label="Password" width="200px" required="false" default="" password="true"/>
-        <param field="Mode1" label="Default Icon ID" width="100px" required="true" default="39762"/>
-        <param field="Mode6" label="Debug" width="200px">
-            <options>
-                <option label="None" value="0"  default="true" />
-                <option label="Python Only" value="2"/>
-                <option label="Basic Debugging" value="62"/>
-                <option label="Basic+Messages" value="126"/>
-                <option label="Connections Only" value="16"/>
-                <option label="Connections+Queue" value="144"/>
-                <option label="All" value="-1"/>
-            </options>
-        </param>
-    </params>
+   
 </plugin>
 """
 
