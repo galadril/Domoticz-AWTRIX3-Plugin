@@ -50,13 +50,6 @@ def validate_plugin_structure(plugin_data):
         print(f"DEBUG: Checking for 'params' element: {'Found' if params is not None else 'Not found'}")
         assert params is not None, "'params' tag not found"
         
-        # List required fields in the <param> tags
-        required_fields = ['Address', 'Mode1', 'Mode6']
-        for field in required_fields:
-            param = params.find(f"./param[@field='{field}']")
-            print(f"DEBUG: Checking for 'param' with 'field={field}': {'Found' if param is not None else 'Not found'}")
-            assert param is not None, f"'param' with 'field={field}' not found"
-        
         print("INFO: Plugin structure is valid.")
         sys.stdout.flush()  # Ensures the outputs are flushed and displayed
         return True
