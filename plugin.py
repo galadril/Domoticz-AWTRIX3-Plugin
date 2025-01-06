@@ -1,5 +1,5 @@
 """
-<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.6" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
+<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.7" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
     <description>
         Plugin for integrating AWTRIX3 Smart Pixel Clock with Domoticz. 
         Send messages as notifications or manage custom apps dynamically.
