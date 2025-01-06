@@ -1,17 +1,18 @@
 """
 <plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.7" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
     <description>
+        <p>
         Plugin for integrating AWTRIX3 Smart Pixel Clock with Domoticz. 
         Send messages as notifications or manage custom apps dynamically.
-        
-        Please download 39762 as default Domoticz icon on your device: 
-        https://developer.lametric.com/icons
-        
-        More on AWTRIX3:
-        https://github.com/Blueforcer/awtrix3
+        </p><p>
+        Please download icon 39762 as default Domoticz icon on your device: <a href="https://developer.lametric.com/icons">https://developer.lametric.com/icons</a>.
+        </p><p>
+        More on AWTRIX3 is available on its github project page: <a href="https://github.com/Blueforcer/awtrix3">https://github.com/Blueforcer/awtrix3</a>.
+        A list of shared AWTRIX 3 automation flows is available on the <a href="https://flows.blueforcer.de/search?provider=domoticz">AWTRIX Flows website</a>.
+        </p>
     </description>
     <params>
-        <param field="Address" label="IP Address" width="200px" required="true" default="92.168.1.100"/>
+        <param field="Address" label="IP Address" width="200px" required="true" default="192.168.1.100"/>
         <param field="Username" label="Username" width="200px" required="false" default=""/>
         <param field="Password" label="Password" width="200px" required="false" default="" password="true"/>
         <param field="Mode1" label="Default Icon ID" width="100px" required="true" default="39762"/>
