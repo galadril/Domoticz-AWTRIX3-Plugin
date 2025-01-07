@@ -1,0 +1,52 @@
+return {
+    active = true,
+
+    on = {
+        devices = {
+            'SwithValentine'
+        }
+    },
+
+    logging = {
+        level = domoticz.LOG_INFO,
+        marker = "AWTRIX_HEART"
+    },
+
+    execute = function(domoticz)
+        local appDevice = domoticz.devices('AWTRIX3 - Send Custom App')
+        if not appDevice then
+            domoticz.log("AWTRIX3 - Send Custom App device not found", domoticz.LOG_ERROR)
+            return
+        end
+
+        -- JSON payloads for the animation steps (as strings)
+        local animationFrames = {
+            -- Start of Heart (as a JSON string)
+            '{"draw":[{"dp":[14,3,"#FF0000"]},{"dp":[15,3,"#FF0000"]},{"dp":[13,4,"#FF0000"]},{"dp":[16,4,"#FF0000"]},{"dp":[12,5,"#FF0000"]},{"dp":[17,5,"#FF0000"]},{"dp":[13,6,"#FF0000"]},{"dp":[16,6,"#FF0000"]},{"dp":[14,7,"#FF0000"]},{"dp":[15,7,"#FF0000"]}]}',
+            '{"draw":[{"dp":[13,2,"#FF0000"]},{"dp":[14,2,"#FF0000"]},{"dp":[15,2,"#FF0000"]},{"dp":[16,2,"#FF0000"]},{"dp":[12,3,"#FF0000"]},{"dp":[17,3,"#FF0000"]},{"dp":[11,4,"#FF0000"]},{"dp":[18,4,"#FF0000"]},{"dp":[12,5,"#FF0000"]},{"dp":[17,5,"#FF0000"]},{"dp":[13,6,"#FF0000"]},{"dp":[16,6,"#FF0000"]},{"dp":[14,7,"#FF0000"]},{"dp":[15,7,"#FF0000"]}]}',
+            '{"draw":[{"dp":[12,1,"#FF0000"]},{"dp":[13,1,"#FF0000"]},{"dp":[16,1,"#FF0000"]},{"dp":[17,1,"#FF0000"]},{"dp":[11,2,"#FF0000"]},{"dp":[14,2,"#FF0000"]},{"dp":[15,2,"#FF0000"]},{"dp":[18,2,"#FF0000"]},{"dp":[10,3,"#FF0000"]},{"dp":[19,3,"#FF0000"]},{"dp":[11,4,"#FF0000"]},{"dp":[18,4,"#FF0000"]},{"dp":[12,5,"#FF0000"]},{"dp":[17,5,"#FF0000"]},{"dp":[13,6,"#FF0000"]},{"dp":[16,6,"#FF0000"]},{"dp":[14,7,"#FF0000"]},{"dp":[15,7,"#FF0000"]}]}',
+            '{"draw":[{"dp":[12,1,"#FF0000"]},{"dp":[13,1,"#FF0000"]},{"dp":[16,1,"#FF0000"]},{"dp":[17,1,"#FF0000"]},{"dp":[11,2,"#FF0000"]},{"dp":[12,2,"#FF0000"]},{"dp":[13,2,"#FF0000"]},{"dp":[14,2,"#FF0000"]},{"dp":[15,2,"#FF0000"]},{"dp":[16,2,"#FF0000"]},{"dp":[17,2,"#FF0000"]},{"dp":[18,2,"#FF0000"]},{"dp":[10,3,"#FF0000"]},{"dp":[11,3,"#FF0000"]},{"dp":[12,3,"#FF0000"]},{"dp":[13,3,"#FF0000"]},{"dp":[14,3,"#FF0000"]},{"dp":[15,3,"#FF0000"]},{"dp":[16,3,"#FF0000"]},{"dp":[17,3,"#FF0000"]},{"dp":[18,3,"#FF0000"]},{"dp":[19,3,"#FF0000"]},{"dp":[11,4,"#FF0000"]},{"dp":[12,4,"#FF0000"]},{"dp":[13,4,"#FF0000"]},{"dp":[14,4,"#FF0000"]},{"dp":[15,4,"#FF0000"]},{"dp":[16,4,"#FF0000"]},{"dp":[17,4,"#FF0000"]},{"dp":[18,4,"#FF0000"]},{"dp":[12,5,"#FF0000"]},{"dp":[13,5,"#FF0000"]},{"dp":[14,5,"#FF0000"]},{"dp":[15,5,"#FF0000"]},{"dp":[16,5,"#FF0000"]},{"dp":[17,5,"#FF0000"]},{"dp":[13,6,"#FF0000"]},{"dp":[14,6,"#FF0000"]},{"dp":[15,6,"#FF0000"]},{"dp":[16,6,"#FF0000"]},{"dp":[14,7,"#FF0000"]},{"dp":[15,7,"#FF0000"]}]}',
+            '{"draw":[{"dp":[12,1,"#FF0000"]},{"dp":[13,1,"#FF0000"]},{"dp":[16,1,"#FF0000"]},{"dp":[17,1,"#FF0000"]},{"dp":[11,2,"#FF0000"]},{"dp":[12,2,"#FF0000"]},{"dp":[13,2,"#FF0000"]},{"dp":[14,2,"#FF0000"]},{"dp":[15,2,"#FF0000"]},{"dp":[16,2,"#FF0000"]},{"dp":[17,2,"#FF0000"]},{"dp":[18,2,"#FF0000"]},{"dp":[10,3,"#FF0000"]},{"dp":[11,3,"#FF0000"]},{"dp":[12,3,"#FF0000"]},{"dp":[13,3,"#FF0000"]},{"dp":[14,3,"#FF0000"]},{"dp":[15,3,"#FF0000"]},{"dp":[16,3,"#FF0000"]},{"dp":[17,3,"#FF0000"]},{"dp":[18,3,"#FF0000"]},{"dp":[19,3,"#FF0000"]},{"dp":[11,4,"#FF0000"]},{"dp":[12,4,"#FF0000"]},{"dp":[13,4,"#FF0000"]},{"dp":[14,4,"#FF0000"]},{"dp":[15,4,"#FF0000"]},{"dp":[16,4,"#FF0000"]},{"dp":[17,4,"#FF0000"]},{"dp":[18,4,"#FF0000"]},{"dp":[12,5,"#FF0000"]},{"dp":[13,5,"#FF0000"]},{"dp":[14,5,"#FF0000"]},{"dp":[15,5,"#FF0000"]},{"dp":[16,5,"#FF0000"]},{"dp":[17,5,"#FF0000"]},{"dp":[13,6,"#FF0000"]},{"dp":[14,6,"#FF0000"]},{"dp":[15,6,"#FF0000"]},{"dp":[16,6,"#FF0000"]},{"dp":[14,7,"#FF0000"]},{"dp":[15,7,"#FF0000"]},{"dp":[12,0,"#FFFF00"]},{"dp":[17,0,"#FFFF00"]},{"dp":[10,1,"#FFFF00"]},{"dp":[19,1,"#FFFF00"]},{"dp":[9,3,"#FFFF00"]},{"dp":[20,3,"#FFFF00"]},{"dp":[10,5,"#FFFF00"]},{"dp":[19,5,"#FFFF00"]},{"dp":[12,8,"#FFFF00"]},{"dp":[17,8,"#FFFF00"]}]}'
+        }
+
+        domoticz.log("AWTRIX3 turned on, starting heart animation.", domoticz.LOG_INFO)
+
+        -- Explicitly schedule each frame update
+        appDevice.setDescription(animationFrames[1]).afterSec(0.5)
+        appDevice.switchOn().afterSec(1)
+
+        appDevice.setDescription(animationFrames[2]).afterSec(1.5)
+        appDevice.switchOn().afterSec(2)
+
+        appDevice.setDescription(animationFrames[3]).afterSec(2.5)
+        appDevice.switchOn().afterSec(3)
+
+        appDevice.setDescription(animationFrames[4]).afterSec(3.5)
+        appDevice.switchOn().afterSec(4)
+
+        appDevice.setDescription(animationFrames[5]).afterSec(4)
+        appDevice.switchOn().afterSec(4.5)
+
+        domoticz.log("Animation scheduling completed.", domoticz.LOG_INFO)
+    end
+}
