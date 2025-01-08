@@ -135,6 +135,12 @@ This project is open-source and contributions are welcome! Visit the GitHub repo
 - [Domoticz Plugin Wiki](https://www.domoticz.com/wiki/Plugins)
 - [Awtrix3 Official Documentation](https://blueforcer.github.io/awtrix3/#/README)
 
+
+## 🧩 Using the Template Repository
+
+If you're interested in creating a new Domoticz plugin, you can use our [template repository](https://github.com/galadril/Domoticz-Python-Plugin-Template). 
+This can serve as a foundation for developing similar projects, making it easier and faster to get started.
+
 # ☕ Donation
 If you like to say thanks, you could always buy me a cup of coffee (/beer)!
 (Thanks!)
