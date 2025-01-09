@@ -127,6 +127,7 @@ The description of the push button (`Send settings`) should be set to a JSON obj
 |   0.0.5 | Added RTTTL Sounds |
 |   0.0.6 | Added devices to change settings |
 |   0.0.8 | Set custom app names + custom app icon |
+|   0.0.9 | Added sleep button |
 
 ## 🚀 Updates and Contributions
 This project is open-source and contributions are welcome! Visit the GitHub repository for more information: [Domoticz-AWTRIX3-Plugin](https://blueforcer.github.io/awtrix3/#/api?id=custom-apps-and-notifications).
