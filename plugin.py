@@ -1,5 +1,5 @@
 """
-<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.8" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
+<plugin key="AWTRIX3" name="AWTRIX3" author="Mark Heinis" version="0.0.9" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/galadril/Domoticz-AWTRIX3-Plugin">
     <description>
         <p>
         Plugin for integrating AWTRIX3 Smart Pixel Clock with Domoticz. 
@@ -58,6 +58,7 @@ class BasePlugin:
         self.selector_overlay = 11  # Device ID for selector of overlay
         self.color_text = 12  # Device ID for the global text color
         self.brightness_unit = 13  # Device ID for the brightness slider
+        self.sleep_button = 14  # New Device ID for the Sleep Button
         
         self.debug_level = 0
 
@@ -214,7 +215,16 @@ class BasePlugin:
                 TypeName="Dimmer"
             ).Create()
             Domoticz.Log("Brightness slider device created.")
-
+            
+        if self.sleep_button not in Devices:
+            Domoticz.Device(
+                Name="Sleep Mode",
+                Unit=self.sleep_button,
+                Type=244, Subtype=73, Switchtype=9,
+                Description="Send the device into sleep mode for X seconds (input X in the description)"
+            ).Create()
+            Domoticz.Log("Sleep Mode Push Button created.")
+        
     def onStop(self):
         Domoticz.Log("AWTRIX Plugin stopped.")
 
@@ -229,7 +239,21 @@ class BasePlugin:
                     Domoticz.Log(f"RTTTL command sent successfully: {description}")
                 except Exception as e:
                     Domoticz.Error(f"Error sending RTTTL command: {e}")
-                    
+                        
+        elif Unit == self.sleep_button:
+            try:
+                # Get the sleep duration from the device description
+                description = Devices[Unit].Description
+                sleep_duration = int(description) if description.isdigit() else 60  # Default to 60 seconds if not set
+                
+                # Send the API command with payload
+                self.send_api_command_payload("sleep", {"sleep": sleep_duration})
+                Domoticz.Log(f"Sent sleep command successfully with duration: {sleep_duration} seconds.")
+            except ValueError:
+                Domoticz.Error("Invalid sleep duration provided. Please ensure the description contains a numeric value.")
+            except Exception as e:
+                Domoticz.Error(f"Error sending sleep command: {e}")
+                
         elif Unit == self.push_button_previous:
             try:
                 self.send_api_command("previousapp")

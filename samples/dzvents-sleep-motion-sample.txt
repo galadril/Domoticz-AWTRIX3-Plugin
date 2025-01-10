@@ -1,0 +1,70 @@
+return {
+    active = true,
+
+    on = {
+        devices = {
+            'Kantoor - BewegingsSensor'
+        },
+        timer = {
+            'every 1 minutes' -- Periodic check for inactivity
+        }
+    },
+
+    logging = {
+        level = domoticz.LOG_INFO,
+        marker = "AWTRIX3_SLEEP"
+    },
+
+    -- Persistent variable to track last motion time
+    data = {
+        lastMotionTime = { initial = nil } -- Initialize with nil
+    },
+
+    execute = function(domoticz, item)
+        local motionSensor = domoticz.devices('Kantoor - BewegingsSensor')
+        local sleepDevice = domoticz.devices('AWTRIX3 - Sleep Mode')
+        local powerDevice = domoticz.devices('AWTRIX3 - Power')
+        local sleepDuration = 1800 -- Sleep duration: 30 minutes
+        local noMotionThreshold = 10 -- Threshold in minutes for inactivity
+
+        -- Helper function to convert rawTime string (HH:MM:SS) to seconds since midnight
+        local function timeToSeconds(rawTime)
+            local hours, minutes, seconds = rawTime:match("(%d+):(%d+):(%d+)")
+            return tonumber(hours) * 3600 + tonumber(minutes) * 60 + tonumber(seconds)
+        end
+
+        -- Initialize lastMotionTime if not already set
+        if not tonumber(domoticz.data.lastMotionTime) then
+            domoticz.data.lastMotionTime = timeToSeconds(domoticz.time.rawTime)
+            domoticz.log('Initialized lastMotionTime to current time in seconds: ' .. domoticz.data.lastMotionTime, domoticz.LOG_INFO)
+        end
+
+        -- Update lastMotionTime based on motion sensor state
+        if motionSensor.state == 'On' then
+            domoticz.data.lastMotionTime = timeToSeconds(domoticz.time.rawTime) -- Update time when motion is detected
+            domoticz.log('Motion detected in Kantoor. Keeping AWTRIX3 awake.', domoticz.LOG_INFO)
+            return -- Exit script as motion was detected
+        end
+
+        -- Calculate inactivity time (in seconds)
+        local inactivityTime = timeToSeconds(domoticz.time.rawTime) - tonumber(domoticz.data.lastMotionTime)
+        domoticz.log('Inactivity duration: ' .. inactivityTime .. ' seconds.', domoticz.LOG_INFO)
+
+        -- Check if the inactivity duration exceeds the threshold
+        if inactivityTime > (noMotionThreshold * 60) then
+            if powerDevice and powerDevice.state == 'On' then
+                if sleepDevice then
+                    sleepDevice.updateText(tostring(sleepDuration)) -- Set sleep duration
+                    sleepDevice.switchOn() -- Trigger sleep mode
+                    domoticz.log('AWTRIX3 put to sleep for ' .. sleepDuration .. ' seconds due to inactivity in Kantoor.', domoticz.LOG_INFO)
+                else
+                    domoticz.log('Sleep Mode device not found.', domoticz.LOG_ERROR)
+                end
+            else
+                domoticz.log('AWTRIX3 is already off. No action required.', domoticz.LOG_INFO)
+            end
+        else
+            domoticz.log('Inactivity time not sufficient to trigger sleep mode.', domoticz.LOG_INFO)
+        end
+    end
+}
