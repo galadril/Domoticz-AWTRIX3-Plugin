@@ -242,8 +242,15 @@ class BasePlugin:
                         
         elif Unit == self.sleep_button:
             try:
-                self.send_api_command("sleep")
-                Domoticz.Log(f"Sent sleep command successfully for {sleep_seconds} seconds.")
+                # Get the sleep duration from the device description
+                description = Devices[Unit].Description
+                sleep_duration = int(description) if description.isdigit() else 60  # Default to 60 seconds if not set
+                
+                # Send the API command with payload
+                self.send_api_command_payload("sleep", {"sleep": sleep_duration})
+                Domoticz.Log(f"Sent sleep command successfully with duration: {sleep_duration} seconds.")
+            except ValueError:
+                Domoticz.Error("Invalid sleep duration provided. Please ensure the description contains a numeric value.")
             except Exception as e:
                 Domoticz.Error(f"Error sending sleep command: {e}")
                 
