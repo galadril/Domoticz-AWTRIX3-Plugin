@@ -1,8 +1,17 @@
+# ⚠️ Deprecated — Domoticz AWTRIX3 Plugin
 
-# Domoticz AWTRIX3 Plugin 🎉
+> **This repository is deprecated and is no longer the recommended version for new installations.**
+>
+> The plugin has been ported to **AWTRIX NG**, which is the new version going forward. Please use the new repository for AWTRIX NG support and future development:
+>
+> 👉 **[Domoticz AWTRIX NG Plugin](https://github.com/galadril/Domoticz-AWTRIXNG-Plugin)**
+>
+> This repository remains available for users who are still running AWTRIX3.
 
-Please note that a newer version is available called AWTRIX NG. Ive ported this plugin for AWTRIX NG here:
-https://github.com/galadril/Domoticz-AWTRIXNG-Plugin
+
+# Domoticz AWTRIX3 Plugin 
+
+Legacy plugin for integrating the AWTRIX3 Smart Pixel Clock with Domoticz.
 
 
 **Plugin for Integrating AWTRIX3 Smart Pixel Clock with Domoticz**
