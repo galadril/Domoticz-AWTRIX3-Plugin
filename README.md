@@ -1,6 +1,10 @@
 
 # Domoticz AWTRIX3 Plugin 🎉
 
+Please note that a newer version is available called AWTRIX NG. Ive ported this plugin for AWTRIX NG here:
+https://github.com/galadril/Domoticz-AWTRIXNG-Plugin
+
+
 **Plugin for Integrating AWTRIX3 Smart Pixel Clock with Domoticz**
 
 ![AWTRIX3 Domoticz](https://github.com/galadril/Domoticz-AWTRIX3-Plugin/blob/master/images/awtrix_domoticz.gif?raw=true)
